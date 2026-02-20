@@ -7,4 +7,4 @@ export type Vector3 = {
   z: number,
 };
 
-export type Facing = 'east' | 'west' | 'north' | 'south';
+export type Facing = 'east' | 'west' | 'north' | 'south' | 'up' | 'down';
