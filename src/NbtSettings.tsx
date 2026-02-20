@@ -1,5 +1,6 @@
 import { useStore } from './state';
 import type { TargetedEvent, TargetedInputEvent } from 'preact';
+import type { Facing } from './types';
 
 export const NbtSettings = () => {
   const startPos = useStore(s => s.startPos);
@@ -24,7 +25,7 @@ export const NbtSettings = () => {
     const value = (e.target as HTMLSelectElement)?.value;
     if (!value) return;
 
-    setPianoFacing(value as 'east' | 'west' | 'north' | 'south');
+    setPianoFacing(value as Facing);
   };
 
   const handleFallingHeightInput = (e: TargetedInputEvent<HTMLInputElement>) => {

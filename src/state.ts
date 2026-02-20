@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { combine } from 'zustand/middleware';
 import type { MidiFile } from 'midifile-ts';
-import type { Nullable, Vector3 } from './types';
+import type { Nullable, Vector3, Facing } from './types';
 
 interface GlobalState {
   midi: Nullable<MidiFile>,
   startPos: Vector3,
-  pianoFacing: 'east' | 'west' | 'north' | 'south',
+  pianoFacing: Facing,
   fallingHeight: number,
 };
 
@@ -34,7 +34,7 @@ export const useStore = create(
         }));
       },
 
-      setFacing: (facing: 'east' | 'west' | 'north' | 'south') => {
+      setFacing: (facing: Facing) => {
         set(() => ({
           pianoFacing: facing,
         }));

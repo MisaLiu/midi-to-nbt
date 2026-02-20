@@ -6,3 +6,5 @@ export type Vector3 = {
   y: number,
   z: number,
 };
+
+export type Facing = 'east' | 'west' | 'north' | 'south';
