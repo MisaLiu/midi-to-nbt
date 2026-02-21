@@ -153,7 +153,7 @@ export const generateNbt = (
 
         dsl.block(
           { x: _tick, y: currentY + i + 3, z: currentZ },
-          `execute as @a at @s run playsound minecraft:lkrb.piano.p${note.noteNumber}fff master @s ~ ~ ~ 1 1`,
+          `rsbfall -219 -29 ${-31 - (note.noteNumber - 21)}`,
           'up',
           i > 0 ? 'chain' : 'normal',
         );

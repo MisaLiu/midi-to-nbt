@@ -11,6 +11,9 @@ importers:
       midifile-ts:
         specifier: ^1.5.2
         version: 1.5.2
+      normalize.css:
+        specifier: ^8.0.1
+        version: 8.0.1
       pako:
         specifier: ^2.1.0
         version: 2.1.0
@@ -20,6 +23,9 @@ importers:
       prismarine-nbt:
         specifier: ^2.8.0
         version: 2.8.0
+      water.css:
+        specifier: ^2.1.1
+        version: 2.1.1
       zustand:
         specifier: ^5.0.11
         version: 5.0.11
@@ -915,6 +921,9 @@ packages:
     resolution: {integrity: sha512-X75ZN8DCLftGM5iKwoYLA3rjnrAEs97MkzvSd4q2746Tgpg8b8XWiBGiBG4ZpgcAqBgtgPHTiAc8ZMCvZuikDw==}
     engines: {node: '>=10'}
 
+  normalize.css@8.0.1:
+    resolution: {integrity: sha512-qizSNPO93t1YUuUhP22btGOo3chcvDFqFaj2TRybP0DMxkHOCTYwp3n34fel4a31ORXy4m1Xq0Gyqpb5m33qIg==}
+
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
@@ -1233,6 +1242,9 @@ packages:
 
   vm-browserify@1.1.2:
     resolution: {integrity: sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==}
+
+  water.css@2.1.1:
+    resolution: {integrity: sha512-gkO5byC+pZ7ndEV18hs/RmxKoDtEZXx06tZU4ocI3IBdv4xV64tlhjIFbDjurysRnNkiy2oQTr8PakRyzZWPJw==}
 
   which-typed-array@1.1.20:
     resolution: {integrity: sha512-LYfpUkmqwl0h9A2HL09Mms427Q1RZWuOHsukfVcKRq9q95iQxdw0ix1JQrqbcDR9PH1QDwf5Qo8OZb5lksZ8Xg==}
@@ -2166,6 +2178,8 @@ snapshots:
       util: 0.12.5
       vm-browserify: 1.1.2
 
+  normalize.css@8.0.1: {}
+
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
@@ -2529,6 +2543,8 @@ snapshots:
       fsevents: 2.3.3
 
   vm-browserify@1.1.2: {}
+
+  water.css@2.1.1: {}
 
   which-typed-array@1.1.20:
     dependencies:

@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "midifile-ts": "^1.5.2",
+    "normalize.css": "^8.0.1",
     "pako": "^2.1.0",
     "preact": "^10.27.2",
     "prismarine-nbt": "^2.8.0",
+    "water.css": "^2.1.1",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
