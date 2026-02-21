@@ -1,7 +1,7 @@
 import type { Facing, Vector3 } from '../types';
 import type { DSLBlock, BlockType } from './types';
 
-type FillExtraFn = (index: number) => {
+type FillExtraFn = (index: number, position: Vector3) => {
   command: string,
   facing: Facing,
   type?: BlockType,
@@ -75,7 +75,7 @@ export class StructureDSL {
       for (let x = minX; x <= maxX; x++) {
         for (let y = minY; y <= maxY; y++) {
           for (let z = minZ; z <= maxZ; z++) {
-            const { command, facing, type } = commandOrExtra(index);
+            const { command, facing, type } = commandOrExtra(index, { x, y, z });
             this.block(
               { x, y, z },
               command,
