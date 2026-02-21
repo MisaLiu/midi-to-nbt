@@ -10,13 +10,17 @@
   },
   "dependencies": {
     "midifile-ts": "^1.5.2",
+    "pako": "^2.1.0",
     "preact": "^10.27.2",
+    "prismarine-nbt": "^2.8.0",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.2",
     "@types/node": "^24.10.1",
+    "@types/pako": "^2.0.4",
     "typescript": "~5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vite-plugin-node-polyfills": "^0.25.0"
   }
 }

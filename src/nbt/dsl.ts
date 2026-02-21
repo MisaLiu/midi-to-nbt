@@ -1,3 +1,5 @@
+import nbt, { TagType } from 'prismarine-nbt';
+import pako from 'pako';
 import type { Facing, Vector3 } from '../types';
 import type { DSLBlock, BlockType } from './types';
 
@@ -6,6 +8,10 @@ type FillExtraFn = (index: number, position: Vector3) => {
   facing: Facing,
   type?: BlockType,
 };
+
+const paletteKey = (block: DSLBlock) => (
+  `${block.type === 'chain' ? 'ccb' : 'cb'}-${block.facing}`
+);
 
 export class StructureDSL {
   private minX = Infinity;
@@ -16,6 +22,18 @@ export class StructureDSL {
   private maxZ = -Infinity;
 
   private blocks: DSLBlock[] = [];
+
+  get width() {
+    return (this.maxX - this.minX) + 1;
+  }
+
+  get height() {
+    return (this.maxY - this.minY) + 1;
+  }
+
+  get depth() {
+    return (this.maxZ - this.minZ) + 1;
+  }
 
   private updateBounds(position: Vector3) {
     this.minX = Math.min(this.minX, position.x);
@@ -87,5 +105,71 @@ export class StructureDSL {
         }
       }
     }
+  }
+
+  toNBT() {
+    if (this.blocks.length <= 0)
+      throw new Error('No blocks in this DSL');
+
+    return new Promise<Uint8Array<ArrayBuffer>>((res) => {
+      const paletteMap = new Map<string, number>();
+      const palette: any[] = []; // TODO: Types
+
+      // Build palette
+      for (const b of this.blocks) {
+        const key = paletteKey(b);
+        if (paletteMap.has(key)) continue;
+
+        paletteMap.set(key, palette.length);
+        palette.push({
+          Name: nbt.string(`minecraft:${b.type === 'chain' ? 'chain_command_block' : 'command_block'}`),
+          Properties: nbt.comp({ facing: nbt.string(b.facing), conditional: nbt.string('false') }),
+        });
+      }
+
+      const blocksNBT: any[] = []; // TODO: Types
+
+      for (const b of this.blocks) {
+        const key = paletteKey(b);
+        const stateIndex = paletteMap.get(key);
+        if (stateIndex === (void 0))
+          throw new Error(`Cannot found palette index for block: ${key}`);
+        
+        const px = b.pos.x - this.minX;
+        const py = b.pos.y - this.minY;
+        const pz = b.pos.z - this.minZ;
+
+        blocksNBT.push({
+          pos: nbt.list(nbt.int([ px, py, pz ])),
+          nbt: nbt.comp({
+            id: nbt.string(`minecraft:${b.type === 'chain' ? 'chain_command_block' : 'command_block'}`),
+            Command: nbt.string(b.command),
+            // @ts-ignore
+            auto: nbt.byte((b.type === 'chain') + 0),
+            //
+            CustomName: nbt.string("{\"text\":\"@\"}"),
+            conditionMet: nbt.byte(0),
+            powered: nbt.byte(0),
+            SuccessCount: nbt.int(0),
+            TrackOutput: nbt.byte(0),
+            UpdateLastExecution: nbt.byte(0),
+          }),
+          state: nbt.int(stateIndex),
+        });
+      }
+
+      const result = nbt.comp({
+        size: nbt.list(nbt.int([ this.width, this.height, this.depth ])),
+        entities: nbt.list(nbt.comp([])),
+        blocks: nbt.list(nbt.comp(blocksNBT)),
+        palette: nbt.list(nbt.comp(palette)),
+        DataVersion: nbt.int(3465),
+      });
+
+      // @ts-ignore
+      const buffer = nbt.writeUncompressed(result);
+      const gzipped = pako.gzip(buffer);
+      res(gzipped);
+    });
   }
 }
