@@ -14,3 +14,9 @@ export interface BPM {
   microsecondsPerBeat: number,
   bpm: number,
 }
+
+export interface NoteSimple {
+  time: number,
+  pitch: number,
+  velocity: number,
+}
