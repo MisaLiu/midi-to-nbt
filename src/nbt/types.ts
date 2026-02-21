@@ -8,3 +8,9 @@ export interface DSLBlock {
   command: string,
   facing: Facing,
 }
+
+export interface BPM {
+  tick: number,
+  microsecondsPerBeat: number,
+  bpm: number,
+}

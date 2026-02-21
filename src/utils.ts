@@ -13,6 +13,10 @@ export const readMidiFile = (file: Blob) => new Promise<MidiFile>((res, rej) => 
   reader.readAsArrayBuffer(file);
 });
 
+export const preciseDouble = (float: number, length = 6) => (
+  Math.round(float * Math.pow(10, length)) / Math.pow(10, length)
+);
+
 export function downloadFile(file: Blob, filename?: string): void;
 export function downloadFile(file: File, filename?: string): void;
 export function downloadFile(file: Blob | File, filename?: string) {
