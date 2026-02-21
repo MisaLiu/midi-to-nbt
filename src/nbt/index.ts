@@ -24,6 +24,10 @@ const tickToMs = (tick: number, bpm: BPM[], ppq: number) => {
 };
 
 export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffer>>((res, rej) => {
+  // TODO: These should be arguments
+  const maxDepth = 40;
+  const startPosX = 70;
+
   const [ metaTrack, ...tracks ] = midi.tracks;
 
   // Parse MIDI
@@ -93,27 +97,76 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
   const dsl = new StructureDSL;
 
   { // This is for PoC purpose
-    let timeCount = 0;
-    for (const ms of notesByMs.keys()) {
-      if (timeCount >= 50) break;
+    const notesMs = [ ...notesByMs.keys() ].sort((a, b) => a - b);
+    let currentZ = 0;
+
+    for (const ms of notesMs) {
+      if (ms >= 50000) break;
 
       const notes = notesByMs.get(ms);
       if (!notes || notes.length <= 0) continue;
 
+      let tick = Math.round(ms * 20 / 1000) - (maxDepth * currentZ);
+      if (tick >= maxDepth) {
+        dsl.fill(
+          { x: 0, y: 1, z: currentZ },
+          { x: maxDepth - 1, y: 1, z: currentZ },
+          'setblock ~ ~1 ~ minecraft:air',
+          'down'
+        );
+
+        dsl.fill(
+          { x: 0, y: 0, z: currentZ },
+          { x: maxDepth - 1, y: 0, z: currentZ },
+          (index) => {
+            let command = 'setblock ~1 ~2 ~ minecraft:redstone_block';
+            if (index + 1 >= maxDepth) command = `setblock ${startPosX} ~2 ~1 minecraft:redstone_block`;
+
+            return {
+              command,
+              facing: 'up',
+              type: 'chain',
+            };
+          }
+        );
+
+        tick -= maxDepth;
+        currentZ++;
+      }
+
       for (let i = 0; i < notes.length; i++) {
         const note = notes[i];
-        const facing = i + 1 < notes.length ? 'up' : 'down';
 
         dsl.block(
-          { x: timeCount, y: i, z: 0 },
+          { x: tick, y: i + 3, z: currentZ },
           `execute as @a at @s run playsound minecraft:lkrb.piano.p${note.noteNumber}fff master @s ~ ~ ~ 1 1`,
-          facing,
+          'up',
           i > 0 ? 'chain' : 'normal',
         );
       }
-
-      timeCount++;
     }
+
+    dsl.fill(
+      { x: 0, y: 1, z: currentZ },
+      { x: maxDepth - 1, y: 1, z: currentZ },
+      'setblock ~ ~1 ~ minecraft:air',
+      'down'
+    );
+
+    dsl.fill(
+      { x: 0, y: 0, z: currentZ },
+      { x: maxDepth - 1, y: 0, z: currentZ },
+      (index) => {
+        let command = 'setblock ~1 ~2 ~ minecraft:redstone_block';
+        if (index + 1 >= maxDepth) command = `setblock ${startPosX} ~2 ~1 minecraft:redstone_block`;
+
+        return {
+          command,
+          facing: 'up',
+          type: 'chain',
+        };
+      }
+    );
   }
 
   dsl.toNBT()
