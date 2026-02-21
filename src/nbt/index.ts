@@ -1,6 +1,6 @@
 import { StructureDSL } from './dsl';
-import type { MidiFile, NoteOnEvent } from 'midifile-ts';
-import type { BPM } from './types';
+import type { MidiFile } from 'midifile-ts';
+import type { BPM, NoteSimple } from './types';
 
 const tickToMs = (tick: number, bpm: BPM[], ppq: number) => {
   let result = 0;
@@ -50,6 +50,7 @@ export const generateNbt = (
   midi: MidiFile,
   maxDepth: number,
   maxWidth: number,
+  tickrate: number = 20,
 ) => new Promise<Uint8Array<ArrayBuffer>>((res, rej) => {
   // Parse MIDI
   const ppq = midi.header.ticksPerBeat;
@@ -84,7 +85,10 @@ export const generateNbt = (
     bpm.sort((a, b) => a.tick - b.tick);
   }
 
-  const notesByTick = new Map<number, NoteOnEvent[]>();
+  const notesByTick = new Map<number, NoteSimple[]>();
+
+  {
+    const notes: NoteSimple[] = [];
 
   for (const track of midi.tracks) {
     let currentTick = 0;
@@ -96,14 +100,36 @@ export const generateNbt = (
       if (event.subtype !== 'noteOn') continue;
       if (event.velocity <= 0) continue;
 
-      const mcTick = Math.round(tickToMs(currentTick, bpm, ppq) * 20 / 1000);
+        notes.push({
+          time: tickToMs(currentTick, bpm, ppq),
+          pitch: event.noteNumber,
+          velocity: event.velocity,
+        });
+      }
+    }
 
-      if (notesByTick.has(mcTick)) {
-        const notes = notesByTick.get(mcTick)!;
-        if (notes.findIndex((i) => i.noteNumber === event.noteNumber) !== -1) continue;
-        notes.push(event);
+    notes.sort((a, b) => a.time - b.time);
+
+    let lastTick = -Infinity;
+
+    for (const note of notes) {
+      let mcTick = (note.time / 1000) * tickrate;
+      mcTick = Math.round(mcTick / 0.5) * 0.5;
+
+      if (mcTick - lastTick < 1)
+        mcTick = lastTick;
+      else
+        lastTick = mcTick;
+
+      const mcTickInt = Math.round(mcTick);
+
+      if (notesByTick.has(mcTickInt)) {
+        const notes = notesByTick.get(mcTickInt)!;
+        if (notes.findIndex((i) => i.pitch === note.pitch) !== -1) continue;
+        notes.push(note);
+        notes.sort((a, b) => a.pitch - b.pitch);
       } else {
-        notesByTick.set(mcTick, [ event ]);
+        notesByTick.set(mcTickInt, [ note ]);
       }
     }
   }
@@ -111,7 +137,7 @@ export const generateNbt = (
   // Generate structure NBT
   const dsl = new StructureDSL;
 
-  { // This is for PoC purpose
+  {
     const notesTick = [ ...notesByTick.keys() ].sort((a, b) => a - b);
     let currentY = 0;
     let currentZ = 0;
@@ -153,7 +179,7 @@ export const generateNbt = (
 
         dsl.block(
           { x: _tick, y: currentY + i + 3, z: currentZ },
-          `rsbfall -219 -29 ${-31 - (note.noteNumber - 21)}`,
+          `rsbfall -219 -29 ${-31 - (note.pitch - 21)}`,
           'up',
           i > 0 ? 'chain' : 'normal',
         );
