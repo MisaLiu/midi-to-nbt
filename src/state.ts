@@ -5,6 +5,8 @@ import type { Nullable, Vector3, Facing } from './types';
 
 interface GlobalState {
   midi: Nullable<MidiFile>,
+  maxDepth: number,
+  maxWidth: number,
   startPos: Vector3,
   pianoFacing: Facing,
   fallingHeight: number,
@@ -14,6 +16,8 @@ export const useStore = create(
   combine(
     {
       midi: null,
+      maxDepth: 50,
+      maxWidth: 140,
       startPos: { x: 0, y: 0, z: 0 },
       pianoFacing: 'south',
       fallingHeight: 20,
@@ -22,6 +26,18 @@ export const useStore = create(
       setMidi: (midi: MidiFile) => {
         set(() => ({
           midi: midi,
+        }));
+      },
+
+      setMaxDepth: (depth: number) => {
+        set(() => ({
+          maxDepth: depth
+        }));
+      },
+
+      setMaxWidth: (width: number) => {
+        set(() => ({
+          maxWidth: width,
         }));
       },
 

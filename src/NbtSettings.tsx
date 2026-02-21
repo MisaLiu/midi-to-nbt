@@ -3,13 +3,37 @@ import type { TargetedEvent, TargetedInputEvent } from 'preact';
 import type { Facing } from './types';
 
 export const NbtSettings = () => {
+  const maxDepth = useStore(s => s.maxDepth);
+  const maxWidth = useStore(s => s.maxWidth);
   const startPos = useStore(s => s.startPos);
   const pianoFacing = useStore(s => s.pianoFacing);
   const fallingHeight = useStore(s => s.fallingHeight);
 
+  const setMaxDepth = useStore(s => s.setMaxDepth);
+  const setMaxWidth = useStore(s => s.setMaxWidth);
   const setStartPos = useStore(s => s.setStartPos);
   const setPianoFacing = useStore(s => s.setFacing);
   const setFallingHeight = useStore(s => s.setFallingHeight);
+
+  const handleMaxDepthInput = (e: TargetedInputEvent<HTMLInputElement>) => {
+    const _value = (e.target as HTMLInputElement)?.value;
+    if (!_value) return;
+
+    const value = parseInt(_value);
+    if (isNaN(value)) return;
+
+    setMaxDepth(value);
+  };
+
+  const handleMaxWidthInput = (e: TargetedInputEvent<HTMLInputElement>) => {
+    const _value = (e.target as HTMLInputElement)?.value;
+    if (!_value) return;
+
+    const value = parseInt(_value);
+    if (isNaN(value)) return;
+
+    setMaxWidth(value);
+  };
 
   const handleStartPosInput = (axis: 'x' | 'y' | 'z', e: TargetedInputEvent<HTMLInputElement>) => {
     const _value = (e.target as HTMLInputElement)?.value;
@@ -42,7 +66,21 @@ export const NbtSettings = () => {
     <fieldset>
       <legend>NBT settings</legend>
       <div>
-        Start position:
+        <label>
+          Max Depth:
+          <input type="number" value={maxDepth} onInput={handleMaxDepthInput} />
+        </label>
+      </div>
+
+      <div>
+        <label>
+          Max Width:
+          <input type="number" value={maxWidth} onInput={handleMaxWidthInput} />
+        </label>
+      </div>
+
+      <div>
+        Piano start position:
         <ul>
           <li>
             <label>

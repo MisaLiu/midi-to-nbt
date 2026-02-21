@@ -4,11 +4,13 @@ import { downloadFile } from './utils';
 
 export const ResultSection = () => {
   const midiFile = useStore(s => s.midi);
+  const maxDepth = useStore(s => s.maxDepth);
+  const maxWidth = useStore(s => s.maxWidth);
 
   const handleGenerateStart = () => {
     if (!midiFile) return;
 
-    generateNbt(midiFile)
+    generateNbt(midiFile, maxDepth, maxWidth)
       .then((buffer) => {
         downloadFile(new Blob([ buffer ]), 'result.nbt');
       })
