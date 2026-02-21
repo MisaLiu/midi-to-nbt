@@ -25,7 +25,7 @@ const tickToMs = (tick: number, bpm: BPM[], ppq: number) => {
 export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffer>>((res, rej) => {
   // TODO: These should be arguments
   const maxDepth = 40;
-  const startPosX = 70;
+  const maxWidth = 10;
 
   const [ metaTrack, ...tracks ] = midi.tracks;
 
@@ -89,7 +89,11 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
 
   { // This is for PoC purpose
     const notesTick = [ ...notesByTick.keys() ].sort((a, b) => a - b);
+    let currentY = 0;
     let currentZ = 0;
+    let currentHighest = 0;
+    let layers = 0;
+    let layerStartTick = 0;
 
     for (const tick of notesTick) {
       if (tick >= 1200) break;
@@ -97,18 +101,18 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
       const notes = notesByTick.get(tick);
       if (!notes || notes.length <= 0) continue;
 
-      let _tick = tick - (maxDepth * currentZ);
+      let _tick = tick - layerStartTick - (maxDepth * currentZ);
       if (_tick >= maxDepth) {
         dsl.fill(
-          { x: 0, y: 1, z: currentZ },
-          { x: maxDepth - 1, y: 1, z: currentZ },
+          { x: 0, y: currentY + 1, z: currentZ },
+          { x: maxDepth - 1, y: currentY + 1, z: currentZ },
           'setblock ~ ~1 ~ minecraft:air',
           'down'
         );
 
         dsl.fill(
-          { x: 0, y: 0, z: currentZ },
-          { x: maxDepth - 1, y: 0, z: currentZ },
+          { x: 0, y: currentY, z: currentZ },
+          { x: maxDepth - 1, y: currentY, z: currentZ },
           (index) => {
             let command = 'setblock ~1 ~2 ~ minecraft:redstone_block';
             if (index + 1 >= maxDepth) command = `setblock ~-${maxDepth - 1} ~2 ~1 minecraft:redstone_block`;
@@ -125,35 +129,51 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
         currentZ++;
       }
 
+      if (currentZ >= maxWidth) {
+        const lastLayerBlock = dsl.getBlock({ x: maxDepth - 1, y: currentY, z: currentZ - 1 });
+        console.log(lastLayerBlock);
+        if (lastLayerBlock) {
+          lastLayerBlock.command = `setblock ~-${maxDepth - 1} ~${currentHighest + 6} ~-${maxWidth - 1} minecraft:redstone_block`;
+        }
+
+        currentY += currentHighest + 4;
+        layers++;
+        layerStartTick = tick;
+
+        currentZ = 0;
+        currentHighest = 0;
+      }
+
       for (let i = 0; i < notes.length; i++) {
         const note = notes[i];
 
         dsl.block(
-          { x: _tick, y: i + 3, z: currentZ },
+          { x: _tick, y: currentY + i + 3, z: currentZ },
           `execute as @a at @s run playsound minecraft:lkrb.piano.p${note.noteNumber}fff master @s ~ ~ ~ 1 1`,
           'up',
           i > 0 ? 'chain' : 'normal',
         );
+        if (notes.length > currentHighest) currentHighest = notes.length;
       }
     }
 
     dsl.fill(
-      { x: 0, y: 1, z: currentZ },
-      { x: maxDepth - 1, y: 1, z: currentZ },
+      { x: 0, y: currentY + 1, z: currentZ },
+      { x: maxDepth - 1, y: currentY + 1, z: currentZ },
       'setblock ~ ~1 ~ minecraft:air',
       'down'
     );
 
     dsl.fill(
-      { x: 0, y: 0, z: currentZ },
-      { x: maxDepth - 1, y: 0, z: currentZ },
+      { x: 0, y: currentY, z: currentZ },
+      { x: maxDepth - 1, y: currentY, z: currentZ },
       (index) => {
         let command = 'setblock ~1 ~2 ~ minecraft:redstone_block';
-        if (index + 1 >= maxDepth) command = `setblock ${startPosX} ~2 ~1 minecraft:redstone_block`;
+        if (index + 1 >= maxDepth) command = `setblock ~-${maxDepth - 1} ~2 ~1 minecraft:redstone_block`;
 
         return {
           command,
-          facing: 'up',
+          facing: 'down',
           type: 'chain',
         };
       }

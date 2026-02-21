@@ -22,6 +22,7 @@ export class StructureDSL {
   private maxZ = -Infinity;
 
   private blocks: DSLBlock[] = [];
+  private blockMap = new Map<string, DSLBlock>();
 
   get width() {
     return (this.maxX - this.minX) + 1;
@@ -56,6 +57,10 @@ export class StructureDSL {
       facing,
       type: type ?? null
     });
+    this.blockMap.set(
+      `${position.x},${position.y},${position.z}`,
+      this.blocks[this.blocks.length - 1]
+    );
     this.updateBounds(position);
   }
 
@@ -105,6 +110,10 @@ export class StructureDSL {
         }
       }
     }
+  }
+
+  getBlock(position: Vector3) {
+    return this.blockMap.get(`${position.x},${position.y},${position.z}`);
   }
 
   toNBT() {
