@@ -7,12 +7,6 @@ type FillExtraFn = (index: number) => {
   type?: BlockType,
 };
 
-type FillParams = [
-  Vector3, Vector3, string, Facing, BlockType | undefined
-] | [
-  Vector3, Vector3, FillExtraFn
-]
-
 export class StructureDSL {
   private minX = Infinity;
   private maxX = -Infinity;
@@ -47,12 +41,15 @@ export class StructureDSL {
     this.updateBounds(position);
   }
 
-  // @ts-ignore Why??
   fill(start: Vector3, stop: Vector3, command: string, facing: Facing, type?: BlockType): void;
   fill(start: Vector3, stop: Vector3, extra: FillExtraFn): void;
-  fill(...args: FillParams) {
-    const [ start, stop, commandOrExtra ] = args;
-
+  fill(
+    start: Vector3,
+    stop: Vector3,
+    commandOrExtra: string | FillExtraFn,
+    facing?: Facing,
+    type?: BlockType
+  ) {
     const minX = Math.min(start.x, stop.x);
     const maxX = Math.max(start.x, stop.x);
     const minY = Math.min(start.y, stop.y);
@@ -67,8 +64,8 @@ export class StructureDSL {
             this.block(
               { x, y, z },
               commandOrExtra,
-              args[3] as Facing,
-              args[4]
+              facing!,
+              type
             );
           }
         }
