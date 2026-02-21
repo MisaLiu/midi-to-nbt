@@ -51,26 +51,26 @@ export const generateNbt = (
   maxDepth: number,
   maxWidth: number,
 ) => new Promise<Uint8Array<ArrayBuffer>>((res, rej) => {
-  const [ metaTrack, ...tracks ] = midi.tracks;
-
   // Parse MIDI
   const ppq = midi.header.ticksPerBeat;
   const bpm: BPM[] = [];
 
   {
-    let currentTick = 0;
-    for (const meta of metaTrack) {
-      currentTick += meta.deltaTime;
+    for (const track of midi.tracks) {
+      let currentTick = 0;
+      for (const event of track) {
+        currentTick += event.deltaTime;
 
-      if (meta.type !== 'meta') continue;
-      if (meta.subtype !== 'setTempo') continue;
+        if (event.type !== 'meta') continue;
+        if (event.subtype !== 'setTempo') continue;
 
-      const mpb = meta.microsecondsPerBeat;
-      bpm.push({
-        tick: currentTick,
-        microsecondsPerBeat: mpb,
-        bpm: 60_000_000 / mpb, // I don't think we need *that* precise
-      });
+        const mpb = event.microsecondsPerBeat;
+        bpm.push({
+          tick: currentTick,
+          microsecondsPerBeat: mpb,
+          bpm: 60_000_000 / mpb,
+        });
+      }
     }
 
     if (bpm.length <= 0) { // This is rare
@@ -86,7 +86,7 @@ export const generateNbt = (
 
   const notesByTick = new Map<number, NoteOnEvent[]>();
 
-  for (const track of tracks) {
+  for (const track of midi.tracks) {
     let currentTick = 0;
 
     for (const event of track) {
