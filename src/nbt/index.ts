@@ -20,7 +20,7 @@ const tickToMs = (tick: number, bpm: BPM[], ppq: number) => {
     result += (deltaTick / ppq) * secPerBeat * 1000;
   }
 
-  return Math.round(result);
+  return result;
 };
 
 export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffer>>((res, rej) => {
@@ -73,41 +73,33 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
       if (event.subtype !== 'noteOn') continue;
       if (event.velocity <= 0) continue;
 
-      if (notesByTick.has(currentTick)) {
-        const notes = notesByTick.get(currentTick)!;
+      const mcTick = Math.round(tickToMs(currentTick, bpm, ppq) * 20 / 1000);
+
+      if (notesByTick.has(mcTick)) {
+        const notes = notesByTick.get(mcTick)!;
         if (notes.findIndex((i) => i.noteNumber === event.noteNumber) !== -1) continue;
         notes.push(event);
       } else {
-        notesByTick.set(currentTick, [ event ]);
+        notesByTick.set(mcTick, [ event ]);
       }
     }
-  }
-
-  const notesByMs = new Map<number, NoteOnEvent[]>();
-
-  for (const tick of notesByTick.keys()) {
-    const notes = notesByTick.get(tick);
-    if (!notes || notes.length <= 0) continue;
-
-    const ms = tickToMs(tick, bpm, ppq);
-    notesByMs.set(ms, notes);
   }
 
   // Generate structure NBT
   const dsl = new StructureDSL;
 
   { // This is for PoC purpose
-    const notesMs = [ ...notesByMs.keys() ].sort((a, b) => a - b);
+    const notesTick = [ ...notesByTick.keys() ].sort((a, b) => a - b);
     let currentZ = 0;
 
-    for (const ms of notesMs) {
-      if (ms >= 50000) break;
+    for (const tick of notesTick) {
+      if (tick >= 1200) break;
 
-      const notes = notesByMs.get(ms);
+      const notes = notesByTick.get(tick);
       if (!notes || notes.length <= 0) continue;
 
-      let tick = Math.round(ms * 20 / 1000) - (maxDepth * currentZ);
-      if (tick >= maxDepth) {
+      let _tick = tick - (maxDepth * currentZ);
+      if (_tick >= maxDepth) {
         dsl.fill(
           { x: 0, y: 1, z: currentZ },
           { x: maxDepth - 1, y: 1, z: currentZ },
@@ -130,7 +122,7 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
           }
         );
 
-        tick -= maxDepth;
+        _tick -= maxDepth;
         currentZ++;
       }
 
@@ -138,7 +130,7 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
         const note = notes[i];
 
         dsl.block(
-          { x: tick, y: i + 3, z: currentZ },
+          { x: _tick, y: i + 3, z: currentZ },
           `execute as @a at @s run playsound minecraft:lkrb.piano.p${note.noteNumber}fff master @s ~ ~ ~ 1 1`,
           'up',
           i > 0 ? 'chain' : 'normal',
