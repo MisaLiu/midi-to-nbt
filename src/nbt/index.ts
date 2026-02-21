@@ -1,5 +1,4 @@
 import { StructureDSL } from './dsl';
-import { preciseDouble } from '../utils';
 import type { MidiFile, NoteOnEvent } from 'midifile-ts';
 import type { BPM } from './types';
 
@@ -46,7 +45,7 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
       bpm.push({
         tick: currentTick,
         microsecondsPerBeat: mpb,
-        bpm: preciseDouble(60_000_000 / mpb, 3), // I don't think we need *that* precise
+        bpm: 60_000_000 / mpb, // I don't think we need *that* precise
       });
     }
 
@@ -112,11 +111,11 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
           { x: maxDepth - 1, y: 0, z: currentZ },
           (index) => {
             let command = 'setblock ~1 ~2 ~ minecraft:redstone_block';
-            if (index + 1 >= maxDepth) command = `setblock ${startPosX} ~2 ~1 minecraft:redstone_block`;
+            if (index + 1 >= maxDepth) command = `setblock ~-${maxDepth - 1} ~2 ~1 minecraft:redstone_block`;
 
             return {
               command,
-              facing: 'up',
+              facing: 'down',
               type: 'chain',
             };
           }
