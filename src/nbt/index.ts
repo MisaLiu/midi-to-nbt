@@ -22,11 +22,35 @@ const tickToMs = (tick: number, bpm: BPM[], ppq: number) => {
   return result;
 };
 
-export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffer>>((res, rej) => {
-  // TODO: These should be arguments
-  const maxDepth = 40;
-  const maxWidth = 10;
+const generateClockBlock = (dsl: StructureDSL, width: number, y: number, z: number) => {
+  dsl.fill(
+    { x: 0, y: y + 1, z: z },
+    { x: width - 1, y: y + 1, z: z },
+    'setblock ~ ~1 ~ minecraft:air',
+    'down'
+  );
 
+  dsl.fill(
+    { x: 0, y: y, z: z },
+    { x: width - 1, y: y, z: z },
+    (index) => {
+      let command = 'setblock ~1 ~2 ~ minecraft:redstone_block';
+      if (index + 1 >= width) command = `setblock ~-${width - 1} ~2 ~1 minecraft:redstone_block`;
+
+      return {
+        command,
+        facing: 'down',
+        type: 'chain',
+      };
+    }
+  );
+};
+
+export const generateNbt = (
+  midi: MidiFile,
+  maxDepth: number,
+  maxWidth: number,
+) => new Promise<Uint8Array<ArrayBuffer>>((res, rej) => {
   const [ metaTrack, ...tracks ] = midi.tracks;
 
   // Parse MIDI
@@ -96,52 +120,32 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
     let layerStartTick = 0;
 
     for (const tick of notesTick) {
-      if (tick >= 1200) break;
-
       const notes = notesByTick.get(tick);
       if (!notes || notes.length <= 0) continue;
 
       let _tick = tick - layerStartTick - (maxDepth * currentZ);
-      if (_tick >= maxDepth) {
-        dsl.fill(
-          { x: 0, y: currentY + 1, z: currentZ },
-          { x: maxDepth - 1, y: currentY + 1, z: currentZ },
-          'setblock ~ ~1 ~ minecraft:air',
-          'down'
-        );
 
-        dsl.fill(
-          { x: 0, y: currentY, z: currentZ },
-          { x: maxDepth - 1, y: currentY, z: currentZ },
-          (index) => {
-            let command = 'setblock ~1 ~2 ~ minecraft:redstone_block';
-            if (index + 1 >= maxDepth) command = `setblock ~-${maxDepth - 1} ~2 ~1 minecraft:redstone_block`;
-
-            return {
-              command,
-              facing: 'down',
-              type: 'chain',
-            };
-          }
-        );
+      while (_tick >= maxDepth) {
+        generateClockBlock(dsl, maxDepth, currentY, currentZ);
 
         _tick -= maxDepth;
         currentZ++;
-      }
 
-      if (currentZ >= maxWidth) {
-        const lastLayerBlock = dsl.getBlock({ x: maxDepth - 1, y: currentY, z: currentZ - 1 });
-        console.log(lastLayerBlock);
-        if (lastLayerBlock) {
-          lastLayerBlock.command = `setblock ~-${maxDepth - 1} ~${currentHighest + 6} ~-${maxWidth - 1} minecraft:redstone_block`;
+        if (currentZ >= maxWidth) {
+          const lastLayerBlock = dsl.getBlock({ x: maxDepth - 1, y: currentY, z: currentZ - 1 });
+          console.log(lastLayerBlock);
+          if (lastLayerBlock) {
+            lastLayerBlock.command = `setblock ~-${maxDepth - 1} ~${currentHighest + 6} ~-${maxWidth - 1} minecraft:redstone_block`;
+          }
+
+          currentY += currentHighest + 4;
+          layers++;
+          layerStartTick = tick;
+
+          currentZ = 0;
+          currentHighest = 0;
+          _tick = tick - layerStartTick;
         }
-
-        currentY += currentHighest + 4;
-        layers++;
-        layerStartTick = tick;
-
-        currentZ = 0;
-        currentHighest = 0;
       }
 
       for (let i = 0; i < notes.length; i++) {
@@ -157,27 +161,7 @@ export const generateNbt = (midi: MidiFile) => new Promise<Uint8Array<ArrayBuffe
       }
     }
 
-    dsl.fill(
-      { x: 0, y: currentY + 1, z: currentZ },
-      { x: maxDepth - 1, y: currentY + 1, z: currentZ },
-      'setblock ~ ~1 ~ minecraft:air',
-      'down'
-    );
-
-    dsl.fill(
-      { x: 0, y: currentY, z: currentZ },
-      { x: maxDepth - 1, y: currentY, z: currentZ },
-      (index) => {
-        let command = 'setblock ~1 ~2 ~ minecraft:redstone_block';
-        if (index + 1 >= maxDepth) command = `setblock ~-${maxDepth - 1} ~2 ~1 minecraft:redstone_block`;
-
-        return {
-          command,
-          facing: 'down',
-          type: 'chain',
-        };
-      }
-    );
+    generateClockBlock(dsl, maxDepth, currentY, currentZ);
   }
 
   dsl.toNBT()
