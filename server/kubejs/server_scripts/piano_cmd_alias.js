@@ -11,7 +11,7 @@ const ChannelBlocks = [
 ];
 
 function armorNBTBuilder(pitch, velocity, channel) {
-  const _channel = (channel - 1) % ChannelBlocks.length;
+  const _channel = channel % ChannelBlocks.length;
 
   // Edit armor stands' NBT data here
   return (

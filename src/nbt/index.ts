@@ -99,6 +99,7 @@ export const generateNbt = (
   }
 
   const notesByTick = new Map<number, NoteSimple[]>();
+  let noteMinChannel = Infinity;
 
   {
     const notes: NoteSimple[] = [];
@@ -112,6 +113,8 @@ export const generateNbt = (
         if (event.type !== 'channel') continue;
         if (event.subtype !== 'noteOn') continue;
         if (event.velocity <= 0) continue;
+
+        noteMinChannel = Math.min(i, noteMinChannel);
 
         notes.push({
           channel: i,
@@ -194,7 +197,7 @@ export const generateNbt = (
         const pianoBlockPos = calcPianoBlockPos(pianoStartPos, pianoFacing, note.pitch);
         dsl.block(
           { x: _tick, y: currentY + i + 3, z: currentZ },
-          `note ${pianoBlockPos.x} ${pianoBlockPos.y + noteFallingHeight} ${pianoBlockPos.z} ${note.pitch} ${Math.round(note.velocity / 127 * 100)} ${note.channel}`,
+          `note ${pianoBlockPos.x} ${pianoBlockPos.y + noteFallingHeight} ${pianoBlockPos.z} ${note.pitch} ${Math.round(note.velocity / 127 * 100)} ${note.channel - noteMinChannel}`,
           'up',
           i > 0 ? 'chain' : 'normal',
         );

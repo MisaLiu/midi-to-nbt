@@ -33,7 +33,7 @@ ServerEvents.tick((event) => {
 
     const y = armor.getY();
 
-    if (y <= PIANO_Y - 2) {
+    if (y <= PIANO_Y - 1) {
       server.runCommandSilent(`execute as @a at @s run playsound minecraft:lkrb.piano.p${noteData.pitch}fff master @s ~ ~ ~ ${noteData.velocity} 1`);
       armor.kill();
     } else {
