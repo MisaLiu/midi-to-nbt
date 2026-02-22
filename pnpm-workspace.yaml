@@ -1,0 +1,2 @@
+patchedDependencies:
+  protodef@1.19.0: patches/protodef@1.19.0.patch
