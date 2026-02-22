@@ -1,8 +1,8 @@
 diff --git a/src/compiler.js b/src/compiler.js
-index 9c8f05729a07bba2f69e4f2a54552205ee86d073..d444a2477d90e6f0ce5e559080a9f9e0e98971ca 100644
+index 9c8f05729a07bba2f69e4f2a54552205ee86d073..871fa8a589b87e33e9d4a3b3df17c95386b75216 100644
 --- a/src/compiler.js
 +++ b/src/compiler.js
-@@ -256,10 +256,11 @@ class Compiler {
+@@ -256,10 +256,12 @@ class Compiler {
     * @param {*} code
     */
    compile (code) {
@@ -12,7 +12,8 @@ index 9c8f05729a07bba2f69e4f2a54552205ee86d073..d444a2477d90e6f0ce5e559080a9f9e0
      const native = this.native // eslint-disable-line
      const { PartialReadError } = require('./utils') // eslint-disable-line
 -    return eval(code)() // eslint-disable-line
-+    return new Function('native', 'PartialReadError', 'return (' + code + ')()')(native, PartialReadError)
++    // Pass Buffer explicitly as it's used in generated code (e.g., Buffer.byteLength, Buffer.from)
++    return new Function('native', 'PartialReadError', 'Buffer', 'return (' + code + ')()')(native, PartialReadError, Buffer)
    }
  }
  

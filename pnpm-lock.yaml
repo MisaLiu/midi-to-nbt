@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   protodef@1.19.0:
-    hash: c8bf6c527cebcb2c2c685718a804d7e2d34a979f6e7cf3b8ad0c8d7c6d81d06d
+    hash: d7fe7a74457d558fbb8d5ab43c42d200a59e767524b32a040c61b4cea71f8356
     path: patches/protodef@1.19.0.patch
 
 importers:
@@ -2266,7 +2266,7 @@ snapshots:
 
   prismarine-nbt@2.8.0:
     dependencies:
-      protodef: 1.19.0(patch_hash=c8bf6c527cebcb2c2c685718a804d7e2d34a979f6e7cf3b8ad0c8d7c6d81d06d)
+      protodef: 1.19.0(patch_hash=d7fe7a74457d558fbb8d5ab43c42d200a59e767524b32a040c61b4cea71f8356)
 
   process-nextick-args@2.0.1: {}
 
@@ -2276,7 +2276,7 @@ snapshots:
     dependencies:
       ajv: 6.14.0
 
-  protodef@1.19.0(patch_hash=c8bf6c527cebcb2c2c685718a804d7e2d34a979f6e7cf3b8ad0c8d7c6d81d06d):
+  protodef@1.19.0(patch_hash=d7fe7a74457d558fbb8d5ab43c42d200a59e767524b32a040c61b4cea71f8356):
     dependencies:
       lodash.reduce: 4.6.0
       protodef-validator: 1.4.0
