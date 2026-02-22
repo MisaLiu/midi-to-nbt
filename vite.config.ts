@@ -5,7 +5,13 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    nodePolyfills(),
+    nodePolyfills({
+      include: [ 'zlib', 'buffer', 'stream' ],
+      globals: {
+        Buffer: true,
+        global: true,
+      },
+    }),
     preact(),
   ],
 })
