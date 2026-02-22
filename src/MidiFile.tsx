@@ -5,6 +5,7 @@ import type { Nullable } from './types';
 
 export const MidiFile = () => {
   const setMidi = useStore((s) => s.setMidi);
+  const setMidiFileName = useStore((s) => s.setMidiFileName);
 
   const handleFileSelect = (e: TargetedInputEvent<HTMLInputElement>) => {
     const target = (e.target as Nullable<HTMLInputElement>);
@@ -13,10 +14,13 @@ export const MidiFile = () => {
     const file = target.files?.[0];
     if (!file) return;
 
+    const filenameSplit = (file.name ?? '').split('.');
+    const filename = filenameSplit.splice(0, filenameSplit.length - 1).join('');
+
     readMidiFile(file)
       .then((midi) => {
         setMidi(midi);
-        console.log(midi);
+        setMidiFileName(filename ?? null);
       })
       .catch(e => {
         alert(e);

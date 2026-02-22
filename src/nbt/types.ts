@@ -16,6 +16,7 @@ export interface BPM {
 }
 
 export interface NoteSimple {
+  channel: number,
   time: number,
   pitch: number,
   velocity: number,

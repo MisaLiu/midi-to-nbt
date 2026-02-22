@@ -1,6 +1,7 @@
 import { StructureDSL } from './dsl';
 import type { MidiFile } from 'midifile-ts';
 import type { BPM, NoteSimple } from './types';
+import type { Facing, Vector3 } from '../types';
 
 const tickToMs = (tick: number, bpm: BPM[], ppq: number) => {
   let result = 0;
@@ -19,6 +20,15 @@ const tickToMs = (tick: number, bpm: BPM[], ppq: number) => {
     result += (deltaTick / ppq) * secPerBeat * 1000;
   }
 
+  return result;
+};
+
+const calcPianoBlockPos = (startPos: Vector3, facing: Facing, pitch: number) => {
+  const result: Vector3 = { ...startPos };
+  if (facing === 'east') result.x += (pitch - 21);
+  if (facing === 'south') result.z += (pitch - 21);
+  if (facing === 'west') result.x -= (pitch - 21);
+  if (facing === 'north') result.z -= (pitch - 21);
   return result;
 };
 
@@ -50,6 +60,9 @@ export const generateNbt = (
   midi: MidiFile,
   maxDepth: number,
   maxWidth: number,
+  pianoStartPos: Vector3,
+  pianoFacing: Facing,
+  noteFallingHeight: number,
   tickrate: number = 20,
 ) => new Promise<Uint8Array<ArrayBuffer>>((res, rej) => {
   // Parse MIDI
@@ -90,17 +103,18 @@ export const generateNbt = (
   {
     const notes: NoteSimple[] = [];
 
-  for (const track of midi.tracks) {
-    let currentTick = 0;
+    for (let i = 0; i < midi.tracks.length; i++) {
+      let currentTick = 0;
 
-    for (const event of track) {
-      currentTick += event.deltaTime;
+      for (const event of midi.tracks[i]) {
+        currentTick += event.deltaTime;
 
-      if (event.type !== 'channel') continue;
-      if (event.subtype !== 'noteOn') continue;
-      if (event.velocity <= 0) continue;
+        if (event.type !== 'channel') continue;
+        if (event.subtype !== 'noteOn') continue;
+        if (event.velocity <= 0) continue;
 
         notes.push({
+          channel: i,
           time: tickToMs(currentTick, bpm, ppq),
           pitch: event.noteNumber,
           velocity: event.velocity,
@@ -177,9 +191,10 @@ export const generateNbt = (
       for (let i = 0; i < notes.length; i++) {
         const note = notes[i];
 
+        const pianoBlockPos = calcPianoBlockPos(pianoStartPos, pianoFacing, note.pitch);
         dsl.block(
           { x: _tick, y: currentY + i + 3, z: currentZ },
-          `rsbfall -219 -29 ${-31 - (note.pitch - 21)}`,
+          `note ${pianoBlockPos.x} ${pianoBlockPos.y + noteFallingHeight} ${pianoBlockPos.z} ${note.pitch} ${Math.round(note.velocity / 127 * 100)} ${note.channel}`,
           'up',
           i > 0 ? 'chain' : 'normal',
         );

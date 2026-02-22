@@ -8,12 +8,14 @@ export const NbtSettings = () => {
   const startPos = useStore(s => s.startPos);
   const pianoFacing = useStore(s => s.pianoFacing);
   const fallingHeight = useStore(s => s.fallingHeight);
+  const gameTickrate = useStore(s => s.gameTickrate);
 
   const setMaxDepth = useStore(s => s.setMaxDepth);
   const setMaxWidth = useStore(s => s.setMaxWidth);
   const setStartPos = useStore(s => s.setStartPos);
   const setPianoFacing = useStore(s => s.setFacing);
   const setFallingHeight = useStore(s => s.setFallingHeight);
+  const setGameTickrate = useStore(s => s.setGameTickrate);
 
   const handleMaxDepthInput = (e: TargetedInputEvent<HTMLInputElement>) => {
     const _value = (e.target as HTMLInputElement)?.value;
@@ -62,9 +64,19 @@ export const NbtSettings = () => {
     setFallingHeight(value);
   };
 
+  const handleGameTickrateInput = (e: TargetedInputEvent<HTMLInputElement>) => {
+    const _value = (e.target as HTMLInputElement)?.value;
+    if (!_value) return;
+
+    const value = parseInt(_value);
+    if (isNaN(value)) return;
+
+    setGameTickrate(value);
+  };
+
   return (
-    <fieldset>
-      <legend>NBT settings</legend>
+    <fieldset class="settings">
+      <legend>Settings</legend>
       <div>
         <label>
           Max Depth:
@@ -120,7 +132,7 @@ export const NbtSettings = () => {
 
       <div>
         <label>
-          Facing:
+          Piano facing:
           <select value={pianoFacing} onChange={handleFacingChanged}>
             <option value='north'>North</option>
             <option value='south'>South</option>
@@ -132,12 +144,25 @@ export const NbtSettings = () => {
 
       <div>
         <label>
-          Falling height:
+          Note falling height:
           <input
             type='number'
             step={1}
             value={fallingHeight}
             onInput={handleFallingHeightInput}
+          />
+        </label>
+      </div>
+
+      <div>
+        <label>
+          Game tickrate:
+          <input
+            type='number'
+            step={1}
+            min={1}
+            value={gameTickrate}
+            onInput={handleGameTickrateInput}
           />
         </label>
       </div>

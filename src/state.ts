@@ -5,27 +5,37 @@ import type { Nullable, Vector3, Facing } from './types';
 
 interface GlobalState {
   midi: Nullable<MidiFile>,
+  midiFileName: Nullable<string>,
   maxDepth: number,
   maxWidth: number,
   startPos: Vector3,
   pianoFacing: Facing,
   fallingHeight: number,
+  gameTickrate: number,
 };
 
 export const useStore = create(
   combine(
     {
       midi: null,
+      midiFileName: null,
       maxDepth: 50,
       maxWidth: 140,
       startPos: { x: 0, y: 0, z: 0 },
       pianoFacing: 'south',
-      fallingHeight: 20,
+      fallingHeight: 60,
+      gameTickrate: 20,
     } as GlobalState,
     (set, get) => ({
       setMidi: (midi: MidiFile) => {
         set(() => ({
           midi: midi,
+        }));
+      },
+
+      setMidiFileName: (filename: string) => {
+        set(() => ({
+          midiFileName: filename,
         }));
       },
 
@@ -59,6 +69,12 @@ export const useStore = create(
       setFallingHeight: (height: number) => {
         set(() => ({
           fallingHeight: height,
+        }));
+      },
+
+      setGameTickrate: (tickrate: number) => {
+        set(() => ({
+          gameTickrate: tickrate,
         }));
       },
     })
