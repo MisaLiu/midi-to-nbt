@@ -22,7 +22,7 @@ export const useStore = create(
       maxDepth: 50,
       maxWidth: 140,
       startPos: { x: 0, y: 0, z: 0 },
-      pianoFacing: 'south',
+      pianoFacing: 'west',
       fallingHeight: 60,
       gameTickrate: 20,
     } as GlobalState,

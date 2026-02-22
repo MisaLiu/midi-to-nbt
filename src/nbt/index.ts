@@ -25,10 +25,10 @@ const tickToMs = (tick: number, bpm: BPM[], ppq: number) => {
 
 const calcPianoBlockPos = (startPos: Vector3, facing: Facing, pitch: number) => {
   const result: Vector3 = { ...startPos };
-  if (facing === 'east') result.x += (pitch - 21);
-  if (facing === 'south') result.z += (pitch - 21);
-  if (facing === 'west') result.x -= (pitch - 21);
-  if (facing === 'north') result.z -= (pitch - 21);
+  if (facing === 'north') result.x += (pitch - 21);
+  if (facing === 'east') result.z += (pitch - 21);
+  if (facing === 'south') result.x -= (pitch - 21);
+  if (facing === 'west') result.z -= (pitch - 21);
   return result;
 };
 
