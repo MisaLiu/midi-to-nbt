@@ -2,10 +2,21 @@
 
 // Modify notes' rolling speed here
 // if you used a custom tickrate
-const ROLLING_SPEED = 4;
+const ROLLING_SPEED = 5;
 
 // Modify piano's Y position
 const PIANO_Y = -61;
+
+const VelocityMap = [
+  'ppp',
+  'pp',
+  'p',
+  'mp',
+  'mf',
+  'f',
+  'ff',
+  'fff'
+];
 
 function getArmorStandData(nbt) {
   const pose = nbt.getCompound('Pose');
@@ -18,6 +29,11 @@ function getArmorStandData(nbt) {
     pitch: parseInt(leftArm[0]),
     velocity: (parseInt(leftArm[1]) / 100).toFixed(2),
   };
+}
+
+function getVelocityCode(velocity) {
+  const index = Math.round(velocity * (VelocityMap.length - 1));
+  return VelocityMap[index];
 }
 
 const RollingDivided = ROLLING_SPEED / 10;
@@ -34,7 +50,7 @@ ServerEvents.tick((event) => {
     const y = armor.getY();
 
     if (y <= PIANO_Y - 1) {
-      server.runCommandSilent(`execute as @a at @s run playsound minecraft:lkrb.piano.p${noteData.pitch}fff master @s ~ ~ ~ ${noteData.velocity} 1`);
+      server.runCommandSilent(`execute as @a at @s run playsound minecraft:lkrb.piano.p${noteData.pitch}${getVelocityCode(noteData.velocity)} master @s ~ ~ ~ 1 1`);
       armor.kill();
     } else {
       armor.setPos(armor.getX(), y - RollingDivided, armor.getZ());
