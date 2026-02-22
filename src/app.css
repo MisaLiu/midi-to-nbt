@@ -1,0 +1,16 @@
+
+fieldset.settings label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+fieldset.settings ul {
+  margin-bottom: 0;
+  padding-left: 30px;
+}
+
+fieldset.settings input,
+fieldset.settings select {
+  display: inline-block;
+}
