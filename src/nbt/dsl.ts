@@ -151,15 +151,9 @@ export class StructureDSL {
         blocksNBT.push({
           pos: nbt.list(nbt.int([ px, py, pz ])),
           nbt: nbt.comp({
-            id: nbt.string(`minecraft:${b.type === 'chain' ? 'chain_command_block' : 'command_block'}`),
             Command: nbt.string(b.command),
             // @ts-ignore
             auto: nbt.byte((b.type === 'chain') + 0),
-            //
-            CustomName: nbt.string("{\"text\":\"@\"}"),
-            conditionMet: nbt.byte(0),
-            powered: nbt.byte(0),
-            SuccessCount: nbt.int(0),
             TrackOutput: nbt.byte(0),
             UpdateLastExecution: nbt.byte(0),
           }),
