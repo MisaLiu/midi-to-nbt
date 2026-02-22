@@ -1,0 +1,1 @@
+Some resources used for the server
