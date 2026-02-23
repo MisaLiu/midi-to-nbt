@@ -2,8 +2,6 @@
 
 // You can change the blocks for each channel by modify this array
 const ChannelBlocks = [
-  "minecraft:white_concrete",
-  "minecraft:light_gray_concrete",
   "minecraft:brown_concrete",
   "minecraft:red_concrete",
   "minecraft:orange_concrete",
