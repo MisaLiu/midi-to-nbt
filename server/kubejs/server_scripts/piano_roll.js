@@ -22,17 +22,15 @@ function getArmorStandData(persistentData) {
   const pitch = persistentData.getInt('pitch');
   if (!pitch) return null;
 
-  const velocity = persistentData.getInt('velocity');
+  const velocity = (
+    parseInt(persistentData.getInt('velocity') || 127) / 127
+  ).toFixed(2);
+  const velocityCodeIndex = Math.round(velocity * (VelocityMap.length - 1));
 
   return {
     pitch: parseInt(pitch),
-    velocity: (parseInt(velocity || 100) / 100).toFixed(2),
+    velocity: VelocityMap[velocityCodeIndex],
   };
-}
-
-function getVelocityCode(velocity) {
-  const index = Math.round(velocity * (VelocityMap.length - 1));
-  return VelocityMap[index];
 }
 
 const RollingDivided = ROLLING_SPEED / 10;
@@ -48,8 +46,8 @@ ServerEvents.tick((event) => {
 
     const y = note.getY();
 
-    if (y <= PIANO_Y - 1) {
-      server.runCommandSilent(`execute as @a at @s run playsound minecraft:lkrb.piano.p${noteData.pitch}${getVelocityCode(noteData.velocity)} master @s ~ ~ ~ 1 1`);
+    if (y <= PIANO_Y - 2) {
+      server.runCommandSilent(`execute as @a at @s run playsound minecraft:lkrb.piano.p${noteData.pitch}${noteData.velocity} master @s ~ ~ ~ 1 1`);
       note.kill();
     } else {
       note.setPos(note.getX(), y - RollingDivided, note.getZ());

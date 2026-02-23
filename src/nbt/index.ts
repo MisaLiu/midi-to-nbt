@@ -197,7 +197,7 @@ export const generateNbt = (
         const pianoBlockPos = calcPianoBlockPos(pianoStartPos, pianoFacing, note.pitch);
         dsl.block(
           { x: _tick, y: currentY + i + 3, z: currentZ },
-          `note ${pianoBlockPos.x} ${pianoBlockPos.y + noteFallingHeight} ${pianoBlockPos.z} ${note.pitch} ${Math.round(note.velocity / 127 * 100)} ${note.channel - noteMinChannel}`,
+          `note ${pianoBlockPos.x} ${pianoBlockPos.y + noteFallingHeight} ${pianoBlockPos.z} ${note.pitch} ${Math.round(note.velocity)} ${note.channel - noteMinChannel}`,
           'up',
           i > 0 ? 'chain' : 'normal',
         );
