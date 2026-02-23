@@ -2,30 +2,25 @@
 
 // You can change the blocks for each channel by modify this array
 const ChannelBlocks = [
-  "minecraft:ochre_froglight",
-  "minecraft:verdant_froglight",
-  "minecraft:pearlescent_froglight",
-  "minecraft:sea_lantern",
-  "minecraft:glowstone",
-  "minecraft:shroomlight"
+  "minecraft:white_concrete",
+  "minecraft:light_gray_concrete",
+  "minecraft:brown_concrete",
+  "minecraft:red_concrete",
+  "minecraft:orange_concrete",
+  "minecraft:yellow_concrete",
+  "minecraft:lime_concrete",
+  "minecraft:green_concrete",
+  "minecraft:cyan_concrete",
+  "minecraft:light_blue_concrete",
+  "minecraft:blue_concrete",
+  "minecraft:purple_concrete",
+  "minecraft:magenta_concrete",
+  "minecraft:pink_concrete"
 ];
 
-function armorNBTBuilder(pitch, velocity, channel) {
-  const _channel = channel % ChannelBlocks.length;
-
-  // Edit armor stands' NBT data here
-  return (
-    [
-      '{',
-      'Tags:["piano_note"],',
-      'OnGround:0b,',
-      `Pose:{LeftArm:[${pitch}f,${velocity}f,0f]},`,
-      `ArmorItems:[{},{},{},{id:"${ChannelBlocks[_channel]}",Count:1b}],`,
-      'Marker:1b,',
-      'Invisible:1b',
-      '}'
-    ].join('')
-  )
+function getChannelBlock(channel) {
+  const index = channel % ChannelBlocks.length;
+  return ChannelBlocks[index];
 }
 
 ServerEvents.commandRegistry(event => {
@@ -45,8 +40,25 @@ ServerEvents.commandRegistry(event => {
         const velocity = Arguments.INTEGER.getResult(ctx, 'velocity');
         const channel = Arguments.INTEGER.getResult(ctx, 'channel');
 
-        ctx.source.server.runCommandSilent(`summon minecraft:armor_stand ${pos.x()} ${pos.y()} ${pos.z()} ${armorNBTBuilder(pitch, velocity, channel)}`);
-        return 1;
+        const level = ctx.getSource().getLevel();
+        if (level.isClientSide()) return 0;
+
+        const block = level.createEntity("minecraft:block_display");
+        if (block) {
+          block.setPosition(pos.x(), pos.y(), pos.z());
+          block.mergeNbt({
+            Tags: [ 'piano_note' ],
+            block_state: { Name: getChannelBlock(channel) },
+            brightness: { block: 15, sky: 15 },
+          });
+          block.persistentData.putInt('pitch', pitch);
+          block.persistentData.putInt('velocity', velocity);
+          block.spawn();
+
+          return 1;
+        }
+
+        return 0;
       })
     ))))
   );

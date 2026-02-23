@@ -18,16 +18,15 @@ const VelocityMap = [
   'fff'
 ];
 
-function getArmorStandData(nbt) {
-  const pose = nbt.getCompound('Pose');
-  if (!pose) return null;
+function getArmorStandData(persistentData) {
+  const pitch = persistentData.getInt('pitch');
+  if (!pitch) return null;
 
-  const leftArm = pose.get('LeftArm');
-  if (!leftArm) return null;
+  const velocity = persistentData.getInt('velocity');
 
   return {
-    pitch: parseInt(leftArm[0]),
-    velocity: (parseInt(leftArm[1]) / 100).toFixed(2),
+    pitch: parseInt(pitch),
+    velocity: (parseInt(velocity || 100) / 100).toFixed(2),
   };
 }
 
@@ -41,19 +40,19 @@ const RollingDivided = ROLLING_SPEED / 10;
 ServerEvents.tick((event) => {
   const server = event.getServer();
   const level = server.getLevel('minecraft:overworld'); //
-  const notes = level.getEntities().filterSelector('@e[type=minecraft:armor_stand,tag=piano_note]');
+  const notes = level.getEntities().filterSelector('@e[type=minecraft:block_display,tag=piano_note]');
 
-  notes.forEach((armor) => {
-    const noteData = getArmorStandData(armor.getNbt());
+  notes.forEach((note) => {
+    const noteData = getArmorStandData(note.getPersistentData());
     if (!noteData) return;
 
-    const y = armor.getY();
+    const y = note.getY();
 
     if (y <= PIANO_Y - 1) {
       server.runCommandSilent(`execute as @a at @s run playsound minecraft:lkrb.piano.p${noteData.pitch}${getVelocityCode(noteData.velocity)} master @s ~ ~ ~ 1 1`);
-      armor.kill();
+      note.kill();
     } else {
-      armor.setPos(armor.getX(), y - RollingDivided, armor.getZ());
+      note.setPos(note.getX(), y - RollingDivided, note.getZ());
     }
   });
 });
