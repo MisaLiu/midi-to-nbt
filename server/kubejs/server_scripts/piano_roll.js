@@ -34,7 +34,7 @@ ServerEvents.tick((event) => {
       global.playNote(server, noteData.pitch, noteData.velocity);
       note.kill();
     } else {
-      note.setPos(note.getX(), y - RollingDivided, note.getZ());
+      note.teleportRelative(0, -RollingDivided, 0);
     }
   });
 });

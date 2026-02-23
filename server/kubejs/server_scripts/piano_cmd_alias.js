@@ -49,17 +49,25 @@ ServerEvents.commandRegistry(event => {
           return;
         }
 
-        server.getPersistentData().putIntArray('piano_start_pos', [ startPos.getX(), startPos.getY(), startPos.getZ() ]);
+        let pianoPosArr = [ startPos.getX(), startPos.getY(), startPos.getZ() ];
+
+        server.getPersistentData().putIntArray('piano_start_pos', pianoPosArr);
         server.getPersistentData().putInt('piano_height', height);
         server.getPersistentData().putString('piano_facing', direction);
 
-        server.tell(`Success. Piano start position: [ ${startPos.getX()}, ${startPos.getY()}, ${startPos.getZ()} ], height: ${height}, facing: ${direction}`);
+        global.piano = {
+          startPos: pianoPosArr,
+          height: height,
+          facing: direction,
+        };
+
+        server.tell(`Success. Piano start position: [ ${pianoPosArr[0]}, ${pianoPosArr[1]}, ${pianoPosArr[2]} ], height: ${height}, facing: ${direction}`);
 
         return 0;
       })
     )))
   );
-  
+
   // Used for generating armor stands
   // Usage: /note [pitch] [velocity] [channel]
   event.register(
@@ -76,23 +84,14 @@ ServerEvents.commandRegistry(event => {
         if (level.isClientSide()) return;
 
         const server = ctx.getSource().getServer();
-        const persistentData = server.getPersistentData();
 
-        if (
-          persistentData.contains('piano_start_pos') &&
-          persistentData.contains('piano_height') &&
-          persistentData.contains('piano_facing')
-        ) {
-          let pianoStartPos = persistentData.getIntArray('piano_start_pos');
-          let pianoHeight = persistentData.getInt('piano_height');
-          let pianoFacing = persistentData.getString('piano_facing');
+        if (global.piano) {
+          let notePos = [ global.piano.startPos[0], global.piano.startPos[1] + global.piano.height, global.piano.startPos[2] ];
 
-          let notePos = [ pianoStartPos[0], pianoStartPos[1] + pianoHeight, pianoStartPos[2] ];
-
-          if (pianoFacing === 'north') notePos[0] += (pitch - 21);
-          if (pianoFacing === 'east') notePos[2] += (pitch - 21);
-          if (pianoFacing === 'south') notePos[0] -= (pitch - 21);
-          if (pianoFacing === 'west') notePos[2] -= (pitch - 21);
+          if (global.piano.facing === 'north') notePos[0] += (pitch - 21);
+          if (global.piano.facing === 'east') notePos[2] += (pitch - 21);
+          if (global.piano.facing === 'south') notePos[0] -= (pitch - 21);
+          if (global.piano.facing === 'west') notePos[2] -= (pitch - 21);
 
           let note = level.createEntity('minecraft:armor_stand');
           if (note) {
