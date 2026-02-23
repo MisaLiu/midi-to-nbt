@@ -102,6 +102,7 @@ ServerEvents.commandRegistry(event => {
               Marker: 1,
               Invisible: 1,
               OnGround: 0,
+              Rotation: [ 0, 0 ],
               ArmorItems: [ {}, {}, {}, { id: getChannelBlock(channel), Count: 1 } ],
             });
 
