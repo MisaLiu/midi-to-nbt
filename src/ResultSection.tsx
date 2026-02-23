@@ -7,9 +7,6 @@ export const ResultSection = () => {
   const midiFileName = useStore(s => s.midiFileName);
   const maxDepth = useStore(s => s.maxDepth);
   const maxWidth = useStore(s => s.maxWidth);
-  const pianoStartPos = useStore(s => s.startPos);
-  const pianoFacing = useStore(s => s.pianoFacing);
-  const noteFallingHeight = useStore(s => s.fallingHeight);
   const gameTickrate = useStore(s => s.gameTickrate);
 
   const handleGenerateStart = () => {
@@ -19,9 +16,6 @@ export const ResultSection = () => {
       midiFile,
       maxDepth,
       maxWidth,
-      pianoStartPos,
-      pianoFacing,
-      noteFallingHeight,
       gameTickrate
     ).then((buffer) => {
       downloadFile(new Blob([ buffer ]), `${midiFileName ?? 'result'}.nbt`);

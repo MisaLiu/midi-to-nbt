@@ -1,7 +1,6 @@
 import { StructureDSL } from './dsl';
 import type { MidiFile } from 'midifile-ts';
 import type { BPM, NoteSimple } from './types';
-import type { Facing, Vector3 } from '../types';
 
 const tickToMs = (tick: number, bpm: BPM[], ppq: number) => {
   let result = 0;
@@ -20,15 +19,6 @@ const tickToMs = (tick: number, bpm: BPM[], ppq: number) => {
     result += (deltaTick / ppq) * secPerBeat * 1000;
   }
 
-  return result;
-};
-
-const calcPianoBlockPos = (startPos: Vector3, facing: Facing, pitch: number) => {
-  const result: Vector3 = { ...startPos };
-  if (facing === 'north') result.x += (pitch - 21);
-  if (facing === 'east') result.z += (pitch - 21);
-  if (facing === 'south') result.x -= (pitch - 21);
-  if (facing === 'west') result.z -= (pitch - 21);
   return result;
 };
 
@@ -60,9 +50,6 @@ export const generateNbt = (
   midi: MidiFile,
   maxDepth: number,
   maxWidth: number,
-  pianoStartPos: Vector3,
-  pianoFacing: Facing,
-  noteFallingHeight: number,
   tickrate: number = 20,
 ) => new Promise<Uint8Array<ArrayBuffer>>((res, rej) => {
   // Parse MIDI
@@ -194,10 +181,9 @@ export const generateNbt = (
       for (let i = 0; i < notes.length; i++) {
         const note = notes[i];
 
-        const pianoBlockPos = calcPianoBlockPos(pianoStartPos, pianoFacing, note.pitch);
         dsl.block(
           { x: _tick, y: currentY + i + 3, z: currentZ },
-          `note ${pianoBlockPos.x} ${pianoBlockPos.y + noteFallingHeight} ${pianoBlockPos.z} ${note.pitch} ${Math.round(note.velocity)} ${note.channel - noteMinChannel}`,
+          `note ${note.pitch} ${Math.round(note.velocity)} ${note.channel - noteMinChannel}`,
           'up',
           i > 0 ? 'chain' : 'normal',
         );

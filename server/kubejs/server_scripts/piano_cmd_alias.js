@@ -2,7 +2,6 @@
 
 // You can change the blocks for each channel by modify this array
 const ChannelBlocks = [
-  "minecraft:brown_concrete",
   "minecraft:red_concrete",
   "minecraft:orange_concrete",
   "minecraft:yellow_concrete",
@@ -13,8 +12,11 @@ const ChannelBlocks = [
   "minecraft:blue_concrete",
   "minecraft:purple_concrete",
   "minecraft:magenta_concrete",
-  "minecraft:pink_concrete"
+  "minecraft:pink_concrete",
+  "minecraft:brown_concrete"
 ];
+
+const Facings = [ 'north', 'south', 'east', 'west' ];
 
 function getChannelBlock(channel) {
   const index = channel % ChannelBlocks.length;
@@ -23,45 +25,97 @@ function getChannelBlock(channel) {
 
 ServerEvents.commandRegistry(event => {
   const { commands: Commands, arguments: Arguments } = event
+
+  event.register(
+    Commands.literal('setpiano')
+      .then(Commands.argument('startposition', Arguments.BLOCK_POS.create(event))
+      .then(Commands.argument('height', Arguments.INTEGER.create(event))
+      .then(Commands.argument('facing', Arguments.WORD.create(event))
+      // .suggests((_, builder) => event.builtinSuggestions.suggest(Facings, builder))
+      .executes(ctx => {
+        const server = ctx.getSource().getServer();
+
+        const startPos = Arguments.BLOCK_POS.getResult(ctx, 'startposition');
+        const height = Arguments.INTEGER.getResult(ctx, 'height');
+        const direction = Arguments.WORD.getResult(ctx, 'facing');
+
+        if (Facings.indexOf(direction) === -1) {
+          server.tell('Wrong facing direction');
+          return;
+        }
+
+        if (height <= 0) {
+          server.tell('Cannot set zero/negative height');
+          return;
+        }
+
+        server.getPersistentData().putIntArray('piano_start_pos', [ startPos.getX(), startPos.getY(), startPos.getZ() ]);
+        server.getPersistentData().putInt('piano_height', height);
+        server.getPersistentData().putString('piano_facing', direction);
+
+        server.tell(`Success. Piano start position: [ ${startPos.getX()}, ${startPos.getY()}, ${startPos.getZ()} ], height: ${height}, facing: ${direction}`);
+
+        return 0;
+      })
+    )))
+  );
   
   // Used for generating armor stands
-  // Usage: /note [position] [pitch] [velocity] [channel]
+  // Usage: /note [pitch] [velocity] [channel]
   event.register(
     Commands.literal('note')
-      .then(Commands.argument('position', Arguments.VEC3_CENTERED.create(event))
       .then(Commands.argument('pitch', Arguments.INTEGER.create(event))
       .then(Commands.argument('velocity', Arguments.INTEGER.create(event))
       .then(Commands.argument('channel', Arguments.INTEGER.create(event))
       .executes((ctx) => {
-        const pos = Arguments.VEC3_CENTERED.getResult(ctx, 'position');
         const pitch = Arguments.INTEGER.getResult(ctx, 'pitch');
         const velocity = Arguments.INTEGER.getResult(ctx, 'velocity');
         const channel = Arguments.INTEGER.getResult(ctx, 'channel');
 
         const level = ctx.getSource().getLevel();
-        if (level.isClientSide()) return 0;
+        if (level.isClientSide()) return;
 
-        const note = level.createEntity('minecraft:armor_stand');
-        if (note) {
-          note.setPosition(pos.x(), pos.y(), pos.z());
-          note.mergeNbt({
-            Tags: [ 'piano_note' ],
-            Marker: 1,
-            Invisible: 1,
-            OnGround: 0,
-            ArmorItems: [ {}, {}, {}, { id: getChannelBlock(channel), Count: 1 } ],
-          });
+        const server = ctx.getSource().getServer();
+        const persistentData = server.getPersistentData();
 
-          // Store note pitch and velocity data
-          note.persistentData.putInt('pitch', pitch);
-          note.persistentData.putInt('velocity', velocity);
-          note.spawn();
+        if (
+          persistentData.contains('piano_start_pos') &&
+          persistentData.contains('piano_height') &&
+          persistentData.contains('piano_facing')
+        ) {
+          let pianoStartPos = persistentData.getIntArray('piano_start_pos');
+          let pianoHeight = persistentData.getInt('piano_height');
+          let pianoFacing = persistentData.getString('piano_facing');
 
-          return 1;
+          let notePos = [ pianoStartPos[0], pianoStartPos[1] + pianoHeight, pianoStartPos[2] ];
+
+          if (pianoFacing === 'north') notePos[0] += (pitch - 21);
+          if (pianoFacing === 'east') notePos[2] += (pitch - 21);
+          if (pianoFacing === 'south') notePos[0] -= (pitch - 21);
+          if (pianoFacing === 'west') notePos[2] -= (pitch - 21);
+
+          let note = level.createEntity('minecraft:armor_stand');
+          if (note) {
+            note.setPosition(notePos[0] + 0.5, notePos[1], notePos[2] + 0.5);
+            note.mergeNbt({
+              Tags: [ 'piano_note' ],
+              Marker: 1,
+              Invisible: 1,
+              OnGround: 0,
+              ArmorItems: [ {}, {}, {}, { id: getChannelBlock(channel), Count: 1 } ],
+            });
+
+            // Store note pitch and velocity data
+            note.persistentData.putInt('pitch', pitch);
+            note.persistentData.putInt('velocity', velocity);
+            note.spawn();
+          }
+        } else {
+          global.playNote(server, pitch, velocity);
         }
 
         return 0;
       })
-    ))))
+    )))
   );
 });

@@ -1,16 +1,13 @@
 import { create } from 'zustand';
 import { combine } from 'zustand/middleware';
 import type { MidiFile } from 'midifile-ts';
-import type { Nullable, Vector3, Facing } from './types';
+import type { Nullable } from './types';
 
 interface GlobalState {
   midi: Nullable<MidiFile>,
   midiFileName: Nullable<string>,
   maxDepth: number,
   maxWidth: number,
-  startPos: Vector3,
-  pianoFacing: Facing,
-  fallingHeight: number,
   gameTickrate: number,
 };
 
@@ -21,12 +18,9 @@ export const useStore = create(
       midiFileName: null,
       maxDepth: 50,
       maxWidth: 140,
-      startPos: { x: 0, y: 0, z: 0 },
-      pianoFacing: 'west',
-      fallingHeight: 60,
       gameTickrate: 20,
     } as GlobalState,
-    (set, get) => ({
+    (set) => ({
       setMidi: (midi: MidiFile) => {
         set(() => ({
           midi: midi,
@@ -48,27 +42,6 @@ export const useStore = create(
       setMaxWidth: (width: number) => {
         set(() => ({
           maxWidth: width,
-        }));
-      },
-
-      setStartPos: (axis: 'x' | 'y' | 'z', value: number) => {
-        const pos = get().startPos;
-        pos[axis] = value;
-
-        set(() => ({
-          startPos: { ...pos },
-        }));
-      },
-
-      setFacing: (facing: Facing) => {
-        set(() => ({
-          pianoFacing: facing,
-        }));
-      },
-
-      setFallingHeight: (height: number) => {
-        set(() => ({
-          fallingHeight: height,
         }));
       },
 
