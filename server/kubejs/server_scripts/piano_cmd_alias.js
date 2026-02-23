@@ -43,17 +43,21 @@ ServerEvents.commandRegistry(event => {
         const level = ctx.getSource().getLevel();
         if (level.isClientSide()) return 0;
 
-        const block = level.createEntity("minecraft:block_display");
-        if (block) {
-          block.setPosition(pos.x(), pos.y(), pos.z());
-          block.mergeNbt({
+        const note = level.createEntity('minecraft:armor_stand');
+        if (note) {
+          note.setPosition(pos.x(), pos.y(), pos.z());
+          note.mergeNbt({
             Tags: [ 'piano_note' ],
-            block_state: { Name: getChannelBlock(channel) },
-            brightness: { block: 15, sky: 15 },
+            Marker: 1,
+            Invisible: 1,
+            OnGround: 0,
+            ArmorItems: [ {}, {}, {}, { id: getChannelBlock(channel), Count: 1 } ],
           });
-          block.persistentData.putInt('pitch', pitch);
-          block.persistentData.putInt('velocity', velocity);
-          block.spawn();
+
+          // Store note pitch and velocity data
+          note.persistentData.putInt('pitch', pitch);
+          note.persistentData.putInt('velocity', velocity);
+          note.spawn();
 
           return 1;
         }

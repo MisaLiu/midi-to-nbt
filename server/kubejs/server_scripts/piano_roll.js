@@ -2,7 +2,7 @@
 
 // Modify notes' rolling speed here
 // if you used a custom tickrate
-const ROLLING_SPEED = 5;
+const ROLLING_SPEED = 6;
 
 // Modify piano's Y position
 const PIANO_Y = -61;
@@ -38,7 +38,7 @@ const RollingDivided = ROLLING_SPEED / 10;
 ServerEvents.tick((event) => {
   const server = event.getServer();
   const level = server.getLevel('minecraft:overworld'); //
-  const notes = level.getEntities().filterSelector('@e[type=minecraft:block_display,tag=piano_note]');
+  const notes = level.getEntities().filterSelector('@e[type=minecraft:armor_stand,tag=piano_note]');
 
   notes.forEach((note) => {
     const noteData = getArmorStandData(note.getPersistentData());
