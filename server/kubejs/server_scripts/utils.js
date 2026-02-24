@@ -42,16 +42,19 @@ ServerEvents.loaded((e) => {
   if (
     persistentData.contains('piano_start_pos') &&
     persistentData.contains('piano_height') &&
-    persistentData.contains('piano_facing')
+    persistentData.contains('piano_facing') &&
+    persistentData.contains('piano_dimension')
   ) {
     let pianoStartPos = persistentData.get('piano_start_pos');
     let pianoHeight = persistentData.getInt('piano_height');
     let pianoFacing = persistentData.getString('piano_facing');
+    let pianoDimension = persistentData.getString('piano_dimension');
 
     global.piano = {
       startPos: pianoStartPos,
       height: pianoHeight,
       facing: pianoFacing,
+      dimension: pianoDimension,
     };
   } else {
     global.piano = null;

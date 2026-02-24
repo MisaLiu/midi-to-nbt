@@ -36,6 +36,7 @@ ServerEvents.commandRegistry(event => {
         const startPos = Arguments.BLOCK_POS.getResult(ctx, 'startposition');
         const height = Arguments.INTEGER.getResult(ctx, 'height');
         const direction = player.getFacing().getName();
+        const dimension = String(player.getLevel().getDimension());
 
         if (
           direction === 'up' ||
@@ -55,14 +56,24 @@ ServerEvents.commandRegistry(event => {
         server.getPersistentData().putIntArray('piano_start_pos', pianoPosArr);
         server.getPersistentData().putInt('piano_height', height);
         server.getPersistentData().putString('piano_facing', direction);
+        server.getPersistentData().putString('piano_dimension', dimension);
 
         global.piano = {
           startPos: pianoPosArr,
           height: height,
           facing: direction,
+          dimension: dimension,
         };
 
-        server.tell(`Success. Piano start position: [ ${pianoPosArr[0]}, ${pianoPosArr[1]}, ${pianoPosArr[2]} ], height: ${height}, facing: ${direction}`);
+        server.tell(
+          [
+            'Success.',
+            `Piano start position: [ ${pianoPosArr[0]}, ${pianoPosArr[1]}, ${pianoPosArr[2]} ],`,
+            `height: ${height},`,
+            `facing: ${direction},`,
+            `dimension: ${dimension}`
+          ].join(' ')
+        );
 
         return 0;
       })

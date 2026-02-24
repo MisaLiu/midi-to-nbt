@@ -64,7 +64,7 @@ ServerEvents.tick((event) => {
   if (!pianoInfo) return;
 
   const server = event.getServer();
-  const level = server.getLevel('minecraft:overworld'); //
+  const level = server.getLevel(pianoInfo.dimension);
   const notes = level.getEntities().filterSelector('@e[type=minecraft:armor_stand,tag=piano_note]');
   const currentTime = Date.now();
 
