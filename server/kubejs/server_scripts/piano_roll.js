@@ -85,11 +85,7 @@ ServerEvents.tick((event) => {
         let material = !isBlack ? WHITE_KEY_HOLD_MATERIAL : BLACK_KEY_HOLD_MATERIAL;
 
         fillKeyBlocks(level, blockPos, isBlack, material);
-        if (isBlack) {
-          level.setBlock([ blockPos[0], blockPos[1] + 3, blockPos[2] ], KEY_EDGE_HOLD_MATERIAL, 2, 0);
-        } else {
-          level.setBlock([ blockPos[0], blockPos[1] + 2, blockPos[2] ], KEY_EDGE_HOLD_MATERIAL, 2, 0);
-        }
+        level.setBlock([ blockPos[0], blockPos[1] + 3, blockPos[2] ], KEY_EDGE_HOLD_MATERIAL, 2, 0);
 
         PressedKeys[noteData.pitch] = {
           pitch: noteData.pitch,
@@ -112,11 +108,7 @@ ServerEvents.tick((event) => {
       let material = !isBlack ? WHITE_KEY_RELEASE_MATERIAL : BLACK_KEY_RELEASE_MATERIAL;
 
       fillKeyBlocks(level, info.blockPos, isBlack, material);
-      if (isBlack) {
-        level.setBlock([ info.blockPos[0], info.blockPos[1] + 3, info.blockPos[2] ], KEY_EDGE_RELEASE_MATERIAL, 2, 0);
-      } else {
-        level.setBlock([ info.blockPos[0], info.blockPos[1] + 2, info.blockPos[2] ], KEY_EDGE_RELEASE_MATERIAL, 2, 0);
-      }
+      level.setBlock([ info.blockPos[0], info.blockPos[1] + 3, info.blockPos[2] ], KEY_EDGE_RELEASE_MATERIAL, 2, 0);
 
       delete PressedKeys[pitch];
     }
