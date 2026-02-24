@@ -6,7 +6,11 @@ const ROLLING_SPEED = 6;
 
 const BLACK_KEY_HOLD_MATERIAL = Blocks.AIR.defaultBlockState();
 
-const BLACK_KEY_RELEASE_MATERIAL = Blocks.BLACKSTONE_SLAB.defaultBlockState();
+const BLACK_KEY_EDGE_HOLD_MATERIAL = Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState();
+
+const BLACK_KEY_RELEASE_MATERIAL = Blocks.POLISHED_BLACKSTONE_SLAB.defaultBlockState();
+
+const BLACK_KEY_EDGE_RELEASE_MATERIAL = Blocks.AMETHYST_BLOCK.defaultBlockState();
 
 const WHITE_KEY_HOLD_MATERIAL = Blocks.QUARTZ_SLAB.defaultBlockState();
 
@@ -74,12 +78,16 @@ ServerEvents.tick((event) => {
       global.playNote(server, noteData.pitch, noteData.velocity);
       note.kill();
 
+      let isBlack = isBlackKey(noteData.pitch);
+      let blockPos = [ Math.floor(note.getX()), Math.floor(note.getY()), Math.floor(note.getZ()) ];
+
       if (!PressedKeys[noteData.pitch]) {
-        let isBlack = isBlackKey(noteData.pitch);
         let material = !isBlack ? WHITE_KEY_HOLD_MATERIAL : BLACK_KEY_HOLD_MATERIAL;
-        let blockPos = [ Math.floor(note.getX()), Math.floor(note.getY()), Math.floor(note.getZ()) ];
 
         fillKeyBlocks(level, blockPos, isBlack, material);
+        if (isBlack) {
+          level.setBlockAndUpdate([ blockPos[0], blockPos[1] + 3, blockPos[2] ], BLACK_KEY_EDGE_HOLD_MATERIAL);
+        }
 
         PressedKeys[noteData.pitch] = {
           pitch: noteData.pitch,
@@ -102,6 +110,9 @@ ServerEvents.tick((event) => {
       let material = !isBlack ? WHITE_KEY_RELEASE_MATERIAL : BLACK_KEY_RELEASE_MATERIAL;
 
       fillKeyBlocks(level, info.blockPos, isBlack, material);
+      if (isBlack) {
+        level.setBlockAndUpdate([ info.blockPos[0], info.blockPos[1] + 3, info.blockPos[2] ], BLACK_KEY_EDGE_RELEASE_MATERIAL);
+      }
 
       delete PressedKeys[pitch];
     }
