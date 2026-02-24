@@ -16,8 +16,6 @@ const ChannelBlocks = [
   "minecraft:brown_concrete"
 ];
 
-const Facings = [ 'north', 'south', 'east', 'west' ];
-
 function getChannelBlock(channel) {
   const index = channel % ChannelBlocks.length;
   return ChannelBlocks[index];
@@ -30,17 +28,20 @@ ServerEvents.commandRegistry(event => {
     Commands.literal('setpiano')
       .then(Commands.argument('startposition', Arguments.BLOCK_POS.create(event))
       .then(Commands.argument('height', Arguments.INTEGER.create(event))
-      .then(Commands.argument('facing', Arguments.WORD.create(event))
-      // .suggests((_, builder) => event.builtinSuggestions.suggest(Facings, builder))
       .executes(ctx => {
-        const server = ctx.getSource().getServer();
+        const source = ctx.getSource();
+        const server = source.getServer();
+        const player = source.getPlayer();
 
         const startPos = Arguments.BLOCK_POS.getResult(ctx, 'startposition');
         const height = Arguments.INTEGER.getResult(ctx, 'height');
-        const direction = Arguments.WORD.getResult(ctx, 'facing');
+        const direction = player.getFacing().getName();
 
-        if (Facings.indexOf(direction) === -1) {
-          server.tell('Wrong facing direction');
+        if (
+          direction === 'up' ||
+          direction === 'down'
+        ) {
+          server.tell('Cannot facing up/down!');
           return;
         }
 
@@ -65,7 +66,7 @@ ServerEvents.commandRegistry(event => {
 
         return 0;
       })
-    )))
+    ))
   );
 
   // Used for generating armor stands
