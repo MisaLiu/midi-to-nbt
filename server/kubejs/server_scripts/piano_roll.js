@@ -6,15 +6,15 @@ const ROLLING_SPEED = 6;
 
 const BLACK_KEY_HOLD_MATERIAL = Blocks.AIR.defaultBlockState();
 
-const BLACK_KEY_EDGE_HOLD_MATERIAL = Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState();
-
 const BLACK_KEY_RELEASE_MATERIAL = Blocks.POLISHED_BLACKSTONE_SLAB.defaultBlockState();
-
-const BLACK_KEY_EDGE_RELEASE_MATERIAL = Blocks.AMETHYST_BLOCK.defaultBlockState();
 
 const WHITE_KEY_HOLD_MATERIAL = Blocks.QUARTZ_SLAB.defaultBlockState();
 
 const WHITE_KEY_RELEASE_MATERIAL = Blocks.QUARTZ_BLOCK.defaultBlockState();
+
+const KEY_EDGE_HOLD_MATERIAL = Blocks.PEARLESCENT_FROGLIGHT.defaultBlockState();
+
+const KEY_EDGE_RELEASE_MATERIAL = Blocks.AMETHYST_BLOCK.defaultBlockState();
 
 function getNoteData(persistentData) {
   const pitch = persistentData.getInt('pitch');
@@ -53,7 +53,7 @@ function fillKeyBlocks(level, notePos, isBlackKey, material) {
     if (facing === 'east') _x -= blockCount;
     if (facing === 'west') _x += blockCount;
 
-    level.setBlockAndUpdate([ _x, blockY, _z ], material);
+    level.setBlock([ _x, blockY, _z ], material, 2, 0);
 
     blockCount--;
   }
@@ -86,7 +86,9 @@ ServerEvents.tick((event) => {
 
         fillKeyBlocks(level, blockPos, isBlack, material);
         if (isBlack) {
-          level.setBlockAndUpdate([ blockPos[0], blockPos[1] + 3, blockPos[2] ], BLACK_KEY_EDGE_HOLD_MATERIAL);
+          level.setBlock([ blockPos[0], blockPos[1] + 3, blockPos[2] ], KEY_EDGE_HOLD_MATERIAL, 2, 0);
+        } else {
+          level.setBlock([ blockPos[0], blockPos[1] + 2, blockPos[2] ], KEY_EDGE_HOLD_MATERIAL, 2, 0);
         }
 
         PressedKeys[noteData.pitch] = {
@@ -111,7 +113,9 @@ ServerEvents.tick((event) => {
 
       fillKeyBlocks(level, info.blockPos, isBlack, material);
       if (isBlack) {
-        level.setBlockAndUpdate([ info.blockPos[0], info.blockPos[1] + 3, info.blockPos[2] ], BLACK_KEY_EDGE_RELEASE_MATERIAL);
+        level.setBlock([ info.blockPos[0], info.blockPos[1] + 3, info.blockPos[2] ], KEY_EDGE_RELEASE_MATERIAL, 2, 0);
+      } else {
+        level.setBlock([ info.blockPos[0], info.blockPos[1] + 2, info.blockPos[2] ], KEY_EDGE_RELEASE_MATERIAL, 2, 0);
       }
 
       delete PressedKeys[pitch];
