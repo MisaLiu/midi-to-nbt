@@ -4,13 +4,13 @@
 // if you used a custom tickrate
 const ROLLING_SPEED = 6;
 
-const BLACK_KEY_HOLD_MATERIAL = Blocks.BLACKSTONE_SLAB;
+const BLACK_KEY_HOLD_MATERIAL = Blocks.AIR.defaultBlockState();
 
-const BLACK_KEY_RELEASE_MATERIAL = Blocks.BLACKSTONE;
+const BLACK_KEY_RELEASE_MATERIAL = Blocks.BLACKSTONE_SLAB.defaultBlockState();
 
-const WHITE_KEY_HOLD_MATERIAL = Blocks.QUARTZ_SLAB;
+const WHITE_KEY_HOLD_MATERIAL = Blocks.QUARTZ_SLAB.defaultBlockState();
 
-const WHITE_KEY_RELEASE_MATERIAL = Blocks.QUARTZ_BLOCK;
+const WHITE_KEY_RELEASE_MATERIAL = Blocks.QUARTZ_BLOCK.defaultBlockState();
 
 function getNoteData(persistentData) {
   const pitch = persistentData.getInt('pitch');
@@ -49,7 +49,7 @@ function fillKeyBlocks(level, notePos, isBlackKey, material) {
     if (facing === 'east') _x -= blockCount;
     if (facing === 'west') _x += blockCount;
 
-    level.setBlockAndUpdate([ _x, blockY, _z ], material.defaultBlockState());
+    level.setBlockAndUpdate([ _x, blockY, _z ], material);
 
     blockCount--;
   }
