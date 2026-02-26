@@ -17,7 +17,7 @@ global.playNote = function (server, pitch, velocity) {
   const velocityCode = VelocityMap[velocityCodeIndex];
 
   let soundPos = [ '~', '~', '~' ];
-  if (global.piano.facing) {
+  if (global.piano && global.piano.facing) {
     let offset = ((43.5 - (pitch - 21)) / 87).toFixed(1);
 
     if (

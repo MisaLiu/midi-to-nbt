@@ -97,7 +97,7 @@ ServerEvents.commandRegistry(event => {
 
         const server = ctx.getSource().getServer();
 
-        if (global.piano) {
+        if (global.piano && global.piano.facing) {
           let notePos = [ global.piano.startPos[0], global.piano.startPos[1] + global.piano.height, global.piano.startPos[2] ];
 
           if (global.piano.facing === 'north') notePos[0] += (pitch - 21);
