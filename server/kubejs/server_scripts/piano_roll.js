@@ -61,7 +61,7 @@ function fillKeyBlocks(level, notePos, isBlackKey, material) {
 
 ServerEvents.tick((event) => {
   const pianoInfo = global.piano;
-  if (!pianoInfo || !pianoInfo.facing) return;
+  if (!pianoInfo || !global.piano.isSet || !pianoInfo.facing) return;
 
   const server = event.getServer();
   const level = server.getLevel(pianoInfo.dimension);

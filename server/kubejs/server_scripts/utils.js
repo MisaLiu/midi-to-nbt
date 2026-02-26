@@ -51,13 +51,20 @@ ServerEvents.loaded((e) => {
     let pianoDimension = persistentData.getString('piano_dimension');
 
     global.piano = {
+      isSet: true,
       startPos: pianoStartPos,
       height: pianoHeight,
       facing: pianoFacing,
       dimension: pianoDimension,
     };
-  } else {
-    global.piano = null;
+  } else {  
+    global.piano = {
+      isSet: false,
+      startPos: [ NaN, NaN, NaN ],
+      height: NaN,
+      facing: '',
+      dimension: '',
+    };
   }
 
   return 0;
