@@ -23,6 +23,7 @@ function getNoteData(persistentData) {
   return {
     pitch: parseInt(pitch),
     velocity: parseInt(persistentData.getInt('velocity') || 127),
+    distance: parseFloat(persistentData.getFloat('distance') || 0),
   };
 }
 
@@ -65,21 +66,19 @@ ServerEvents.tick((event) => {
 
   const server = event.getServer();
   const level = server.getLevel(pianoInfo.dimension);
-  const notes = level.getEntities().filterSelector('@e[type=minecraft:armor_stand,tag=piano_note]');
+  const notes = level.getEntities().filterSelector('@e[type=minecraft:block_display,tag=piano_note]');
   const currentTime = Date.now();
 
   notes.forEach((note) => {
     const noteData = getNoteData(note.getPersistentData());
     if (!noteData) return;
 
-    const y = note.getY();
-
-    if (y <= pianoInfo.startPos[1] - 2) {
+    if (noteData.distance >= global.piano.height) {
       global.playNote(server, noteData.pitch, noteData.velocity);
       note.kill();
 
       let isBlack = isBlackKey(noteData.pitch);
-      let blockPos = [ Math.floor(note.getX()), Math.floor(note.getY()), Math.floor(note.getZ()) ];
+      let blockPos = [ Math.floor(note.getX()), pianoInfo.startPos[1] - 3, Math.floor(note.getZ()) ];
 
       if (!PressedKeys[noteData.pitch]) {
         let material = !isBlack ? WHITE_KEY_HOLD_MATERIAL : BLACK_KEY_HOLD_MATERIAL;
@@ -96,7 +95,23 @@ ServerEvents.tick((event) => {
         PressedKeys[noteData.pitch].time = currentTime;
       }
     } else {
-      note.teleportRelative(0, -RollingDivided, 0);
+      // note.teleportRelative(0, -RollingDivided, 0);
+      if (noteData.distance === 0) {
+        // initalize interpolation
+        note.mergeNbt({
+          transformation: {
+            translation:[0, -global.piano.height, 0],
+            left_rotation:[0, 0, 0, 1],
+            scale:[1, 1, 1],
+            right_rotation:[0, 0, 0, 1]
+          },
+          start_interpolation: -1,
+          interpolation_duration: global.piano.height / RollingDivided,
+        });
+      }
+
+      note.persistentData.putFloat('distance', noteData.distance + RollingDivided);
+      note.setCustomName('distance: ' + noteData.distance);
     }
   });
 

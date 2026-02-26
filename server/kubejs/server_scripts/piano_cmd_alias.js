@@ -106,21 +106,25 @@ ServerEvents.commandRegistry(event => {
           if (global.piano.facing === 'south') notePos[0] -= (pitch - 21);
           if (global.piano.facing === 'west') notePos[2] -= (pitch - 21);
 
-          let note = level.createEntity('minecraft:armor_stand');
+          let note = level.createEntity('minecraft:block_display');
           if (note) {
-            note.setPosition(notePos[0] + 0.5, notePos[1], notePos[2] + 0.5);
+            note.setPosition(notePos[0], notePos[1], notePos[2]);
             note.mergeNbt({
               Tags: [ 'piano_note' ],
-              Marker: 1,
-              Invisible: 1,
-              OnGround: 0,
-              Rotation: [ 0, 0 ],
-              ArmorItems: [ {}, {}, {}, { id: getChannelBlock(channel), Count: 1 } ],
+              block_state: { Name: getChannelBlock(channel) },
+              transformation: {
+                translation:[0, 0, 0],
+                left_rotation:[0, 0, 0, 1],
+                scale:[1, 1, 1],
+                right_rotation:[0, 0, 0, 1]
+              }
             });
 
             // Store note pitch and velocity data
             note.persistentData.putInt('pitch', pitch);
             note.persistentData.putInt('velocity', velocity);
+            note.persistentData.putFloat('distance', 0);
+            note.setCustomNameVisible(true);
             note.spawn();
           }
         } else {
