@@ -115,10 +115,10 @@ ServerEvents.commandRegistry(event => {
               Tags: [ 'piano_note' ],
               block_state: { Name: getChannelBlock(channel) },
               transformation: {
-                translation:[0, 0, 0],
-                left_rotation:[0, 0, 0, 1],
-                scale:[1, duration * global.RollingDivided, 1],
-                right_rotation:[0, 0, 0, 1]
+                scale: [ 1, duration * global.RollingDivided, 1 ],
+                translation: [ 0, 0, 0 ],
+                left_rotation: [ 0, 0, 0, 1 ],
+                right_rotation: [ 0, 0, 0, 1 ],
               }
             });
 
@@ -127,7 +127,6 @@ ServerEvents.commandRegistry(event => {
             note.persistentData.putInt('velocity', velocity);
             note.persistentData.putFloat('distance', 0);
             note.persistentData.putInt('duration', duration);
-            note.setCustomNameVisible(true);
             note.spawn();
           }
         } else {

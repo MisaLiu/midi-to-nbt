@@ -83,6 +83,7 @@ ServerEvents.tick((event) => {
         const entry = PressedKeys[noteData.pitch];
         if (entry) {
           entry.count--;
+
           if (entry.count <= 0) {
             let isBlack = isBlackKey(noteData.pitch);
             let material = !isBlack ? WHITE_KEY_RELEASE_MATERIAL : BLACK_KEY_RELEASE_MATERIAL;
@@ -92,6 +93,7 @@ ServerEvents.tick((event) => {
             delete PressedKeys[noteData.pitch];
           }
         }
+
         note.kill();
       } else {
         note.persistentData.putInt('remaining', remaining);
@@ -122,10 +124,10 @@ ServerEvents.tick((event) => {
         // initalize interpolation
         note.mergeNbt({
           transformation: {
-            translation:[0, -global.piano.height-global.RollingDivided*noteData.duration, 0],
-            left_rotation:[0, 0, 0, 1],
-            scale:[1, noteData.duration * global.RollingDivided, 1],
-            right_rotation:[0, 0, 0, 1]
+            translation: [ 0, -global.piano.height - global.RollingDivided * noteData.duration, 0 ],
+            scale: [ 1, noteData.duration * global.RollingDivided, 1 ],
+            left_rotation: [ 0, 0, 0, 1 ],
+            right_rotation: [ 0, 0, 0, 1 ],
           },
           start_interpolation: -1,
           interpolation_duration: global.piano.height / global.RollingDivided + noteData.duration,
@@ -133,7 +135,6 @@ ServerEvents.tick((event) => {
       }
 
       note.persistentData.putFloat('distance', noteData.distance + global.RollingDivided);
-      note.setCustomName(`Note: ${noteData.pitch} (${noteData.velocity}) ${noteData.distance.toFixed(2)}/${global.piano.height.toFixed(2)}`);
     }
   });
 });
