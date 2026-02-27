@@ -82,16 +82,18 @@ ServerEvents.commandRegistry(event => {
   );
 
   // Used for generating armor stands
-  // Usage: /note [pitch] [velocity] [channel]
+  // Usage: /note [pitch] [velocity] [channel] [duration]
   event.register(
     Commands.literal('note')
       .then(Commands.argument('pitch', Arguments.INTEGER.create(event))
       .then(Commands.argument('velocity', Arguments.INTEGER.create(event))
       .then(Commands.argument('channel', Arguments.INTEGER.create(event))
+      .then(Commands.argument('duration', Arguments.INTEGER.create(event))
       .executes((ctx) => {
         const pitch = Arguments.INTEGER.getResult(ctx, 'pitch');
         const velocity = Arguments.INTEGER.getResult(ctx, 'velocity');
         const channel = Arguments.INTEGER.getResult(ctx, 'channel');
+        const duration = Arguments.INTEGER.getResult(ctx, 'duration');
 
         const level = ctx.getSource().getLevel();
         if (level.isClientSide()) return;
@@ -115,15 +117,16 @@ ServerEvents.commandRegistry(event => {
               transformation: {
                 translation:[0, 0, 0],
                 left_rotation:[0, 0, 0, 1],
-                scale:[1, 1, 1],
+                scale:[1, duration * global.RollingDivided, 1],
                 right_rotation:[0, 0, 0, 1]
               }
             });
 
-            // Store note pitch and velocity data
+            // Store note pitch, velocity and duration data
             note.persistentData.putInt('pitch', pitch);
             note.persistentData.putInt('velocity', velocity);
             note.persistentData.putFloat('distance', 0);
+            note.persistentData.putInt('duration', duration);
             note.setCustomNameVisible(true);
             note.spawn();
           }
@@ -133,6 +136,6 @@ ServerEvents.commandRegistry(event => {
 
         return 0;
       })
-    )))
+    ))))
   );
 });
