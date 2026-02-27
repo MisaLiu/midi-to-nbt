@@ -20,4 +20,5 @@ export interface NoteSimple {
   time: number,
   pitch: number,
   velocity: number,
+  duration: number, // ticks
 }

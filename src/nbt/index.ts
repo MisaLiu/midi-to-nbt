@@ -90,6 +90,8 @@ export const generateNbt = (
 
   {
     const notes: NoteSimple[] = [];
+    // FIFO stack per (track, pitch) to match noteOn indices to their noteOff
+    const noteOnIndices = new Map<string, number[]>();
 
     for (let i = 0; i < midi.tracks.length; i++) {
       let currentTick = 0;
@@ -98,17 +100,34 @@ export const generateNbt = (
         currentTick += event.deltaTime;
 
         if (event.type !== 'channel') continue;
-        if (event.subtype !== 'noteOn') continue;
-        if (event.velocity <= 0) continue;
 
-        noteMinChannel = Math.min(i, noteMinChannel);
+        const isNoteOn = event.subtype === 'noteOn' && event.velocity > 0;
+        const isNoteOff = event.subtype === 'noteOff' ||
+          (event.subtype === 'noteOn' && event.velocity === 0);
 
-        notes.push({
-          channel: i,
-          time: tickToMs(currentTick, bpm, ppq),
-          pitch: event.noteNumber,
-          velocity: event.velocity,
-        });
+        if (isNoteOn) {
+          noteMinChannel = Math.min(i, noteMinChannel);
+
+          const key = `${i},${event.noteNumber}`;
+          if (!noteOnIndices.has(key)) noteOnIndices.set(key, []);
+          noteOnIndices.get(key)!.push(notes.length);
+
+          notes.push({
+            channel: i,
+            time: tickToMs(currentTick, bpm, ppq),
+            pitch: event.noteNumber,
+            velocity: event.velocity,
+            duration: 250, // default; overwritten when noteOff is found
+          });
+        } else if (isNoteOff) {
+          const key = `${i},${event.noteNumber}`;
+          const indexStack = noteOnIndices.get(key);
+          if (indexStack && indexStack.length > 0) {
+            const noteIndex = indexStack.shift()!;
+            notes[noteIndex].duration =
+              tickToMs(currentTick, bpm, ppq) - notes[noteIndex].time;
+          }
+        }
       }
     }
 
@@ -180,10 +199,11 @@ export const generateNbt = (
 
       for (let i = 0; i < notes.length; i++) {
         const note = notes[i];
+        const durationInTicks = Math.max(1, Math.round((note.duration / 1000) * tickrate));
 
         dsl.block(
           { x: _tick, y: currentY + i + 3, z: currentZ },
-          `note ${note.pitch} ${Math.round(note.velocity)} ${note.channel - noteMinChannel}`,
+          `note ${note.pitch} ${Math.round(note.velocity)} ${note.channel - noteMinChannel} ${durationInTicks}`,  // duration in ticks
           'up',
           i > 0 ? 'chain' : 'normal',
         );

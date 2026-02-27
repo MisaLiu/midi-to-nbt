@@ -82,16 +82,18 @@ ServerEvents.commandRegistry(event => {
   );
 
   // Used for generating armor stands
-  // Usage: /note [pitch] [velocity] [channel]
+  // Usage: /note [pitch] [velocity] [channel] [duration]
   event.register(
     Commands.literal('note')
       .then(Commands.argument('pitch', Arguments.INTEGER.create(event))
       .then(Commands.argument('velocity', Arguments.INTEGER.create(event))
       .then(Commands.argument('channel', Arguments.INTEGER.create(event))
+      .then(Commands.argument('duration', Arguments.INTEGER.create(event))
       .executes((ctx) => {
         const pitch = Arguments.INTEGER.getResult(ctx, 'pitch');
         const velocity = Arguments.INTEGER.getResult(ctx, 'velocity');
         const channel = Arguments.INTEGER.getResult(ctx, 'channel');
+        const duration = Arguments.INTEGER.getResult(ctx, 'duration');
 
         const level = ctx.getSource().getLevel();
         if (level.isClientSide()) return;
@@ -106,21 +108,25 @@ ServerEvents.commandRegistry(event => {
           if (global.piano.facing === 'south') notePos[0] -= (pitch - 21);
           if (global.piano.facing === 'west') notePos[2] -= (pitch - 21);
 
-          let note = level.createEntity('minecraft:armor_stand');
+          let note = level.createEntity('minecraft:block_display');
           if (note) {
-            note.setPosition(notePos[0] + 0.5, notePos[1], notePos[2] + 0.5);
+            note.setPosition(notePos[0], notePos[1], notePos[2]);
             note.mergeNbt({
               Tags: [ 'piano_note' ],
-              Marker: 1,
-              Invisible: 1,
-              OnGround: 0,
-              Rotation: [ 0, 0 ],
-              ArmorItems: [ {}, {}, {}, { id: getChannelBlock(channel), Count: 1 } ],
+              block_state: { Name: getChannelBlock(channel) },
+              transformation: {
+                scale: [ 1, duration * global.RollingDivided, 1 ],
+                translation: [ 0, 0, 0 ],
+                left_rotation: [ 0, 0, 0, 1 ],
+                right_rotation: [ 0, 0, 0, 1 ],
+              }
             });
 
-            // Store note pitch and velocity data
+            // Store note pitch, velocity and duration data
             note.persistentData.putInt('pitch', pitch);
             note.persistentData.putInt('velocity', velocity);
+            note.persistentData.putFloat('distance', 0);
+            note.persistentData.putInt('duration', duration);
             note.spawn();
           }
         } else {
@@ -129,6 +135,6 @@ ServerEvents.commandRegistry(event => {
 
         return 0;
       })
-    )))
+    ))))
   );
 });
