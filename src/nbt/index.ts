@@ -148,7 +148,6 @@ export const generateNbt = (
 
       if (notesByTick.has(mcTickInt)) {
         const notes = notesByTick.get(mcTickInt)!;
-        if (notes.findIndex((i) => i.pitch === note.pitch) !== -1) continue;
         notes.push(note);
         notes.sort((a, b) => a.pitch - b.pitch);
       } else {
